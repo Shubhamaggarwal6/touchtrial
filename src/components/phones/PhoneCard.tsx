@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Phone } from '@/data/phones';
 import { useCart } from '@/context/CartContext';
+import { useCompare } from '@/context/CompareContext';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PhoneCardProps {
   phone: Phone;
@@ -12,7 +14,9 @@ interface PhoneCardProps {
 
 export function PhoneCard({ phone }: PhoneCardProps) {
   const { addToCart, removeFromCart, isInCart } = useCart();
+  const { addToCompare, removeFromCompare, isInCompare, compareCount } = useCompare();
   const inCart = isInCart(phone.id);
+  const inCompare = isInCompare(phone.id);
 
   const handleCartAction = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,6 +25,16 @@ export function PhoneCard({ phone }: PhoneCardProps) {
       removeFromCart(phone.id);
     } else {
       addToCart(phone);
+    }
+  };
+
+  const handleCompareAction = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inCompare) {
+      removeFromCompare(phone.id);
+    } else {
+      addToCompare(phone);
     }
   };
 
@@ -49,6 +63,25 @@ export function PhoneCard({ phone }: PhoneCardProps) {
             >
               {phone.brand}
             </Badge>
+            {/* Compare Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleCompareAction}
+                  disabled={!inCompare && compareCount >= 4}
+                  className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
+                    inCompare 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-background/90 hover:bg-primary hover:text-primary-foreground'
+                  } ${!inCompare && compareCount >= 4 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Scale className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {inCompare ? 'Remove from compare' : compareCount >= 4 ? 'Max 4 phones' : 'Add to compare'}
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Content */}
