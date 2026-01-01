@@ -1,12 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Search, Menu, X, Smartphone } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Smartphone, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/context/CartContext';
+import { useCompare } from '@/context/CompareContext';
 import { useState } from 'react';
 
 export function Header() {
   const { itemCount } = useCart();
+  const { compareCount } = useCompare();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,6 +51,9 @@ export function Header() {
           <Link to="/phones" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             All Phones
           </Link>
+          <Link to="/compare" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Compare
+          </Link>
           <Link to="/how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             How It Works
           </Link>
@@ -56,6 +61,16 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <Link to="/compare">
+            <Button variant="ghost" size="icon" className="relative">
+              <Scale className="h-5 w-5" />
+              {compareCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
+                  {compareCount}
+                </span>
+              )}
+            </Button>
+          </Link>
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />
@@ -100,6 +115,13 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
             >
               All Phones
+            </Link>
+            <Link 
+              to="/compare" 
+              className="px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Compare
             </Link>
             <Link 
               to="/how-it-works" 
