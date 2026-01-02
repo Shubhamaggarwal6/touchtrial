@@ -1,17 +1,24 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Search, Menu, X, Smartphone, Scale } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Smartphone, Scale, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/context/CartContext';
 import { useCompare } from '@/context/CompareContext';
+import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 
 export function Header() {
   const { itemCount } = useCart();
   const { compareCount } = useCompare();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +88,26 @@ export function Header() {
               )}
             </Button>
           </Link>
+
+          {/* Auth buttons */}
+          {user ? (
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth" className="hidden md:block">
+              <Button variant="default" size="sm">
+                Sign In
+              </Button>
+            </Link>
+          )}
           
           <Button 
             variant="ghost" 
@@ -130,6 +157,34 @@ export function Header() {
             >
               How It Works
             </Link>
+            {user ? (
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className="px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button 
+                  className="px-3 py-2 rounded-lg hover:bg-secondary transition-colors text-left"
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link 
+                to="/auth" 
+                className="px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
         </div>
       )}
