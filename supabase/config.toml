@@ -1,1 +1,4 @@
 project_id = "pecudnxqwtugkezrsomr"
+
+[functions.phone-advisor]
+verify_jwt = false
