@@ -139,9 +139,11 @@ const CartPage = () => {
                   </p>
                 </div>
 
-                <Button variant="hero" size="lg" className="w-full mt-6">
-                  Proceed to Checkout
-                  <ArrowRight className="h-5 w-5" />
+                <Button asChild variant="hero" size="lg" className="w-full mt-6">
+                  <Link to="/checkout">
+                    Proceed to Checkout
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground mt-4">
