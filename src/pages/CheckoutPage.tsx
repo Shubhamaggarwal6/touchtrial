@@ -7,11 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CreditCard, Smartphone, Wallet } from 'lucide-react';
+import { Loader2, CreditCard, Smartphone, Wallet, Clock } from 'lucide-react';
+
+const TIME_SLOTS = [
+  { value: '9am-12pm', label: '9:00 AM - 12:00 PM' },
+  { value: '12pm-3pm', label: '12:00 PM - 3:00 PM' },
+  { value: '3pm-6pm', label: '3:00 PM - 6:00 PM' },
+  { value: '6pm-9pm', label: '6:00 PM - 9:00 PM' },
+];
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -19,6 +27,7 @@ const CheckoutPage = () => {
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
+  const [timeSlot, setTimeSlot] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,6 +77,15 @@ const CheckoutPage = () => {
       return;
     }
 
+    if (!timeSlot) {
+      toast({
+        title: 'Time slot required',
+        description: 'Please select a preferred delivery time slot',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!user) {
       toast({
         title: 'Not authenticated',
@@ -90,7 +108,7 @@ const CheckoutPage = () => {
         total_experience_fee: experienceFee,
         convenience_fee: convenienceFee,
         total_amount: totalAmount,
-        delivery_address: address,
+        delivery_address: `${address} (Time Slot: ${TIME_SLOTS.find(s => s.value === timeSlot)?.label})`,
         payment_method: paymentMethod,
         status: 'pending',
       });
@@ -145,6 +163,36 @@ const CheckoutPage = () => {
                       placeholder="Enter your complete delivery address"
                       required
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Time Slot Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Preferred Time Slot
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="timeSlot">Select a delivery time slot</Label>
+                    <Select value={timeSlot} onValueChange={setTimeSlot}>
+                      <SelectTrigger id="timeSlot">
+                        <SelectValue placeholder="Choose a time slot" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((slot) => (
+                          <SelectItem key={slot.value} value={slot.value}>
+                            {slot.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Our team will deliver the phones within the selected time window
+                    </p>
                   </div>
                 </CardContent>
               </Card>
