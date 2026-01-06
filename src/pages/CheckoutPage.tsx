@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { format, addDays } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CreditCard, Smartphone, Wallet, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Loader2, CreditCard, Smartphone, Wallet, Clock, CalendarIcon } from 'lucide-react';
 
 const TIME_SLOTS = [
   { value: '9am-12pm', label: '9:00 AM - 12:00 PM' },
@@ -27,9 +31,14 @@ const CheckoutPage = () => {
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [timeSlot, setTimeSlot] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Disable dates before tomorrow and after 30 days from now
+  const minDate = addDays(new Date(), 1);
+  const maxDate = addDays(new Date(), 30);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -77,6 +86,15 @@ const CheckoutPage = () => {
       return;
     }
 
+    if (!deliveryDate) {
+      toast({
+        title: 'Delivery date required',
+        description: 'Please select a preferred delivery date',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!timeSlot) {
       toast({
         title: 'Time slot required',
@@ -108,7 +126,9 @@ const CheckoutPage = () => {
         total_experience_fee: experienceFee,
         convenience_fee: convenienceFee,
         total_amount: totalAmount,
-        delivery_address: `${address} (Time Slot: ${TIME_SLOTS.find(s => s.value === timeSlot)?.label})`,
+        delivery_address: address,
+        delivery_date: format(deliveryDate, 'yyyy-MM-dd'),
+        time_slot: timeSlot,
         payment_method: paymentMethod,
         status: 'pending',
       });
@@ -167,17 +187,47 @@ const CheckoutPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Time Slot Selection */}
+              {/* Delivery Date & Time Selection */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Preferred Time Slot
+                    <CalendarIcon className="h-5 w-5" />
+                    Delivery Date & Time
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Date Picker */}
                   <div className="space-y-2">
-                    <Label htmlFor="timeSlot">Select a delivery time slot</Label>
+                    <Label>Select delivery date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !deliveryDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {deliveryDate ? format(deliveryDate, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={deliveryDate}
+                          onSelect={setDeliveryDate}
+                          disabled={(date) => date < minDate || date > maxDate}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Time Slot */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timeSlot">Select delivery time slot</Label>
                     <Select value={timeSlot} onValueChange={setTimeSlot}>
                       <SelectTrigger id="timeSlot">
                         <SelectValue placeholder="Choose a time slot" />

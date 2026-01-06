@@ -19,11 +19,13 @@ export type Database = {
           convenience_fee: number
           created_at: string
           delivery_address: string
+          delivery_date: string | null
           id: string
           payment_method: string | null
           phone_ids: string[]
           phone_names: string[]
           status: string
+          time_slot: string | null
           total_amount: number
           total_experience_fee: number
           updated_at: string
@@ -33,11 +35,13 @@ export type Database = {
           convenience_fee?: number
           created_at?: string
           delivery_address: string
+          delivery_date?: string | null
           id?: string
           payment_method?: string | null
           phone_ids: string[]
           phone_names: string[]
           status?: string
+          time_slot?: string | null
           total_amount: number
           total_experience_fee: number
           updated_at?: string
@@ -47,11 +51,13 @@ export type Database = {
           convenience_fee?: number
           created_at?: string
           delivery_address?: string
+          delivery_date?: string | null
           id?: string
           payment_method?: string | null
           phone_ids?: string[]
           phone_names?: string[]
           status?: string
+          time_slot?: string | null
           total_amount?: number
           total_experience_fee?: number
           updated_at?: string
