@@ -11,15 +11,16 @@ interface CartContextType {
   removeFromCart: (phoneId: string) => void;
   clearCart: () => void;
   isInCart: (phoneId: string) => boolean;
-  experienceFee: number;
+  experienceDeposit: number;
   totalAmount: number;
   itemCount: number;
-  maxPhones: number;
-  canAddMore: boolean;
+  basePhones: number;
+  extraPhoneCharge: number;
 }
 
-const FLAT_EXPERIENCE_FEE = 499;
-const MAX_PHONES = 6;
+const BASE_DEPOSIT = 499;
+const BASE_PHONE_LIMIT = 6;
+const EXTRA_PHONE_CHARGE = 69;
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -29,9 +30,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = useCallback((phone: Phone) => {
     setItems(prev => {
       if (prev.some(item => item.phone.id === phone.id)) {
-        return prev;
-      }
-      if (prev.length >= MAX_PHONES) {
         return prev;
       }
       return [...prev, { phone }];
@@ -50,9 +48,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return items.some(item => item.phone.id === phoneId);
   }, [items]);
 
-  const experienceFee = items.length > 0 ? FLAT_EXPERIENCE_FEE : 0;
-  const totalAmount = experienceFee;
-  const canAddMore = items.length < MAX_PHONES;
+  const extraPhones = Math.max(0, items.length - BASE_PHONE_LIMIT);
+  const extraPhoneCharge = extraPhones * EXTRA_PHONE_CHARGE;
+  const experienceDeposit = items.length > 0 ? BASE_DEPOSIT + extraPhoneCharge : 0;
+  const totalAmount = experienceDeposit;
 
   return (
     <CartContext.Provider
@@ -62,11 +61,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         clearCart,
         isInCart,
-        experienceFee,
+        experienceDeposit,
         totalAmount,
         itemCount: items.length,
-        maxPhones: MAX_PHONES,
-        canAddMore,
+        basePhones: BASE_PHONE_LIMIT,
+        extraPhoneCharge,
       }}
     >
       {children}

@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
 
 const CartPage = () => {
-  const { items, removeFromCart, clearCart, experienceFee, totalAmount, maxPhones } = useCart();
+  const { items, removeFromCart, clearCart, experienceDeposit, totalAmount, basePhones, extraPhoneCharge, itemCount } = useCart();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -112,12 +112,20 @@ const CartPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Home Experience (up to {maxPhones} phones)
+                      Home Experience (up to {basePhones} phones)
                     </span>
-                    <span>{formatPrice(experienceFee)}</span>
+                    <span>₹499</span>
                   </div>
+                  {itemCount > basePhones && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Extra phones ({itemCount - basePhones} × ₹69)
+                      </span>
+                      <span>{formatPrice(extraPhoneCharge)}</span>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    {items.length} of {maxPhones} phones selected
+                    {itemCount} phone{itemCount > 1 ? 's' : ''} selected
                   </p>
                   
                   <Separator />
@@ -131,7 +139,7 @@ const CartPage = () => {
                 {/* Refund Notice */}
                 <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                   <p className="text-xs text-muted-foreground">
-                    💰 Experience fee of {formatPrice(experienceFee)} will be refunded if you purchase any of these phones.
+                    💰 Deposit of {formatPrice(experienceDeposit)} will be refunded if you purchase any of these phones.
                   </p>
                 </div>
 

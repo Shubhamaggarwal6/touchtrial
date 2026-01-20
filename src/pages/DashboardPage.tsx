@@ -256,14 +256,10 @@ function BookingCard({
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground">Experience Fee</p>
+              <p className="text-muted-foreground">Experience Deposit</p>
               <p className="font-medium">₹{booking.total_experience_fee}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Convenience Fee</p>
-              <p className="font-medium">₹{booking.convenience_fee}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Total Paid</p>

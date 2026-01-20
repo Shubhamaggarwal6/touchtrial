@@ -136,11 +136,11 @@ const PhoneDetailPage = () => {
               </p>
             </div>
 
-            {/* Experience Fee Notice */}
+            {/* Deposit Notice */}
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
               <p className="text-sm">
-                <span className="font-semibold text-primary">₹50 experience fee</span>{' '}
-                will be refunded if you buy this phone.
+                <span className="font-semibold text-primary">₹499 deposit</span>{' '}
+                for up to 6 phones, refunded on purchase.
               </p>
             </div>
 
