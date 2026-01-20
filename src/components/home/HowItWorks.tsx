@@ -10,13 +10,13 @@ const steps = [
   {
     icon: Package,
     title: 'Get Delivered',
-    description: 'Pay a small experience fee and receive the phones at your doorstep.',
+    description: 'Pay a small deposit and receive up to 6 phones at your doorstep.',
     color: 'bg-accent/10 text-accent',
   },
   {
     icon: CreditCard,
     title: 'Buy or Return',
-    description: 'Love it? Buy and get your fee refunded. Not for you? Simply return.',
+    description: 'Love it? Buy and get your deposit refunded. Not for you? Simply return.',
     color: 'bg-primary/10 text-primary',
   },
 ];
@@ -59,7 +59,7 @@ export function HowItWorks() {
         {/* Refund Notice */}
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary/10 border border-primary/20">
-            <span className="text-primary font-semibold">💰 Your ₹50 experience fee is refunded when you purchase any phone</span>
+            <span className="text-primary font-semibold">💰 Your ₹499 deposit is refunded when you purchase any phone</span>
           </div>
         </div>
       </div>

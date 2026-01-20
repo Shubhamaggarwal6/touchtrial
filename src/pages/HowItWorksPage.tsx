@@ -19,11 +19,11 @@ const steps = [
   {
     icon: Package,
     number: 2,
-    title: 'Pay Experience Fee & Get Delivered',
-    description: 'Pay a small experience fee of ₹50 per phone plus ₹100 convenience fee. Your selected phones will be delivered to your doorstep within 24-48 hours.',
+    title: 'Pay Deposit & Get Delivered',
+    description: 'Pay a refundable deposit of ₹499 for up to 6 phones. Need more? Add ₹69 per extra phone. Your selected phones will be delivered to your doorstep within 24-48 hours.',
     details: [
-      '₹50 per phone experience fee',
-      '₹100 one-time convenience fee',
+      '₹499 deposit for up to 6 phones',
+      '₹69 per extra phone beyond 6',
       'Free doorstep delivery',
       'Delivered within 24-48 hours'
     ]
@@ -44,9 +44,9 @@ const steps = [
     icon: CheckCircle2,
     number: 4,
     title: 'Buy or Return',
-    description: 'Love a phone? Purchase it and your experience fee gets refunded. Not satisfied? Simply return all phones with free pickup. No questions asked.',
+    description: 'Love a phone? Purchase it and your deposit gets refunded. Not satisfied? Simply return all phones with free pickup. No questions asked.',
     details: [
-      'Full experience fee refund on purchase',
+      'Full deposit refund on purchase',
       'Free pickup for returns',
       'No hidden charges',
       'Hassle-free process'
@@ -120,34 +120,30 @@ const HowItWorksPage = () => {
                 <p className="text-sm text-muted-foreground mb-2">3 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>3 phones × ₹50</span>
-                    <span>₹150</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Convenience fee</span>
-                    <span>₹100</span>
+                    <span>Up to 6 phones</span>
+                    <span>₹499</span>
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹250</span>
+                    <span>₹499</span>
                   </div>
                 </div>
               </div>
 
               <div className="bg-card rounded-xl p-4 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">5 Phones Experience</p>
+                <p className="text-sm text-muted-foreground mb-2">8 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>5 phones × ₹50</span>
-                    <span>₹250</span>
+                    <span>Up to 6 phones</span>
+                    <span>₹499</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Convenience fee</span>
-                    <span>₹100</span>
+                    <span>2 extra phones × ₹69</span>
+                    <span>₹138</span>
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹350</span>
+                    <span>₹637</span>
                   </div>
                 </div>
               </div>

@@ -27,7 +27,7 @@ const TIME_SLOTS = [
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { items, experienceFee, totalAmount, clearCart, maxPhones } = useCart();
+  const { items, experienceDeposit, totalAmount, clearCart, basePhones, extraPhoneCharge, itemCount } = useCart();
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
@@ -123,7 +123,7 @@ const CheckoutPage = () => {
         user_id: user.id,
         phone_ids: phoneIds,
         phone_names: phoneNames,
-        total_experience_fee: experienceFee,
+        total_experience_fee: experienceDeposit,
         convenience_fee: 0,
         total_amount: totalAmount,
         delivery_address: address,
@@ -313,12 +313,20 @@ const CheckoutPage = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        Home Experience (up to {maxPhones} phones)
+                        Home Experience (up to {basePhones} phones)
                       </span>
-                      <span>{formatPrice(experienceFee)}</span>
+                      <span>₹499</span>
                     </div>
+                    {itemCount > basePhones && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Extra phones ({itemCount - basePhones} × ₹69)
+                        </span>
+                        <span>{formatPrice(extraPhoneCharge)}</span>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      {items.length} of {maxPhones} phones selected
+                      {itemCount} phone{itemCount > 1 ? 's' : ''} selected
                     </p>
                     
                     <Separator />
