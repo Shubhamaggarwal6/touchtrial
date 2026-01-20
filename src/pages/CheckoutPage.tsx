@@ -27,7 +27,7 @@ const TIME_SLOTS = [
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { items, experienceFee, convenienceFee, totalAmount, clearCart } = useCart();
+  const { items, experienceFee, totalAmount, clearCart, maxPhones } = useCart();
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
@@ -124,7 +124,7 @@ const CheckoutPage = () => {
         phone_ids: phoneIds,
         phone_names: phoneNames,
         total_experience_fee: experienceFee,
-        convenience_fee: convenienceFee,
+        convenience_fee: 0,
         total_amount: totalAmount,
         delivery_address: address,
         delivery_date: format(deliveryDate, 'yyyy-MM-dd'),
@@ -296,7 +296,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{phone.brand} {phone.model}</p>
-                        <p className="text-sm text-muted-foreground">Experience fee: ₹50</p>
+                        <p className="text-sm text-muted-foreground">{phone.ram} • {phone.storage}</p>
                       </div>
                     </div>
                   ))}
@@ -313,14 +313,13 @@ const CheckoutPage = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        Experience Fee ({items.length} phone{items.length > 1 ? 's' : ''} × ₹50)
+                        Home Experience (up to {maxPhones} phones)
                       </span>
                       <span>{formatPrice(experienceFee)}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Convenience Fee</span>
-                      <span>{formatPrice(convenienceFee)}</span>
-                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {items.length} of {maxPhones} phones selected
+                    </p>
                     
                     <Separator />
                     

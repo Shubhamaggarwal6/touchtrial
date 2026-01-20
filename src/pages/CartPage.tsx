@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
 
 const CartPage = () => {
-  const { items, removeFromCart, clearCart, experienceFee, convenienceFee, totalAmount } = useCart();
+  const { items, removeFromCart, clearCart, experienceFee, totalAmount, maxPhones } = useCart();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -86,9 +86,6 @@ const CartPage = () => {
                       <p className="text-lg font-bold text-primary mt-2">
                         {formatPrice(phone.price)}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Experience fee: ₹50
-                      </p>
                     </div>
 
                     {/* Remove Button */}
@@ -115,14 +112,13 @@ const CartPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Experience Fee ({items.length} phone{items.length > 1 ? 's' : ''} × ₹50)
+                      Home Experience (up to {maxPhones} phones)
                     </span>
                     <span>{formatPrice(experienceFee)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Convenience Fee</span>
-                    <span>{formatPrice(convenienceFee)}</span>
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {items.length} of {maxPhones} phones selected
+                  </p>
                   
                   <Separator />
                   
