@@ -12,13 +12,14 @@ interface CartContextType {
   clearCart: () => void;
   isInCart: (phoneId: string) => boolean;
   experienceFee: number;
-  convenienceFee: number;
   totalAmount: number;
   itemCount: number;
+  maxPhones: number;
+  canAddMore: boolean;
 }
 
-const EXPERIENCE_FEE_PER_PHONE = 50;
-const CONVENIENCE_FEE = 100;
+const FLAT_EXPERIENCE_FEE = 499;
+const MAX_PHONES = 6;
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -28,6 +29,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = useCallback((phone: Phone) => {
     setItems(prev => {
       if (prev.some(item => item.phone.id === phone.id)) {
+        return prev;
+      }
+      if (prev.length >= MAX_PHONES) {
         return prev;
       }
       return [...prev, { phone }];
@@ -46,9 +50,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return items.some(item => item.phone.id === phoneId);
   }, [items]);
 
-  const experienceFee = items.length * EXPERIENCE_FEE_PER_PHONE;
-  const convenienceFee = items.length > 0 ? CONVENIENCE_FEE : 0;
-  const totalAmount = experienceFee + convenienceFee;
+  const experienceFee = items.length > 0 ? FLAT_EXPERIENCE_FEE : 0;
+  const totalAmount = experienceFee;
+  const canAddMore = items.length < MAX_PHONES;
 
   return (
     <CartContext.Provider
@@ -59,9 +63,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         isInCart,
         experienceFee,
-        convenienceFee,
         totalAmount,
         itemCount: items.length,
+        maxPhones: MAX_PHONES,
+        canAddMore,
       }}
     >
       {children}
