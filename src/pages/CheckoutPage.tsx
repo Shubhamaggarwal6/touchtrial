@@ -27,7 +27,7 @@ const TIME_SLOTS = [
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { items, experienceDeposit, totalAmount, clearCart, basePhones, extraPhoneCharge, itemCount } = useCart();
+  const { items, totalAmount, clearCart, basePhones, extraPhoneCharge, itemCount, couponCode, couponDiscount, homeExperienceDeposit, convenienceFee } = useCart();
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
@@ -123,8 +123,8 @@ const CheckoutPage = () => {
         user_id: user.id,
         phone_ids: phoneIds,
         phone_names: phoneNames,
-        total_experience_fee: experienceDeposit,
-        convenience_fee: 0,
+        total_experience_fee: homeExperienceDeposit,
+        convenience_fee: convenienceFee,
         total_amount: totalAmount,
         delivery_address: address,
         delivery_date: format(deliveryDate, 'yyyy-MM-dd'),
@@ -313,9 +313,15 @@ const CheckoutPage = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        Home Experience (up to {basePhones} phones)
+                        Home Experience Deposit
                       </span>
-                      <span>₹499</span>
+                      <span>{formatPrice(homeExperienceDeposit)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Convenience Fee
+                      </span>
+                      <span>{formatPrice(convenienceFee)}</span>
                     </div>
                     {itemCount > basePhones && (
                       <div className="flex justify-between text-sm">
@@ -326,8 +332,18 @@ const CheckoutPage = () => {
                       </div>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {itemCount} phone{itemCount > 1 ? 's' : ''} selected
+                      {itemCount} phone{itemCount > 1 ? 's' : ''} selected (up to {basePhones} included)
                     </p>
+                    
+                    {couponCode && couponDiscount > 0 && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>Coupon ({couponCode})</span>
+                          <span>-{formatPrice(couponDiscount)}</span>
+                        </div>
+                      </>
+                    )}
                     
                     <Separator />
                     

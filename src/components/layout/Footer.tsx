@@ -12,7 +12,7 @@ export function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-hero">
                 <Smartphone className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span>PhoneHome</span>
+              <span>TouchTrial</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Try smartphones at home before you buy. Experience the future of phone shopping.
@@ -58,9 +58,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact Us</h4>
             <div className="flex flex-col gap-3">
-              <a href="mailto:hello@phonehome.in" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="mailto:hello@touchtrial.in" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Mail className="h-4 w-4" />
-                hello@phonehome.in
+                hello@touchtrial.in
               </a>
               <a href="tel:+919876543210" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Phone className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} PhoneHome. All rights reserved.
+          © {new Date().getFullYear()} TouchTrial. All rights reserved.
         </div>
       </div>
     </footer>

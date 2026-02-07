@@ -16,16 +16,25 @@ interface CartContextType {
   itemCount: number;
   basePhones: number;
   extraPhoneCharge: number;
+  couponCode: string;
+  couponDiscount: number;
+  applyCoupon: (code: string) => boolean;
+  removeCoupon: () => void;
+  homeExperienceDeposit: number;
+  convenienceFee: number;
 }
 
-const BASE_DEPOSIT = 499;
-const BASE_PHONE_LIMIT = 6;
+const HOME_EXPERIENCE_DEPOSIT = 400;
+const CONVENIENCE_FEE = 99;
+const BASE_PHONE_LIMIT = 5;
 const EXTRA_PHONE_CHARGE = 69;
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
   const addToCart = useCallback((phone: Phone) => {
     setItems(prev => {
@@ -42,16 +51,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
+    setCouponCode('');
+    setCouponDiscount(0);
   }, []);
 
   const isInCart = useCallback((phoneId: string) => {
     return items.some(item => item.phone.id === phoneId);
   }, [items]);
 
+  const applyCoupon = useCallback((code: string) => {
+    // Simple coupon validation - can be expanded
+    const upperCode = code.toUpperCase();
+    if (upperCode === 'TRIAL50') {
+      setCouponCode(upperCode);
+      setCouponDiscount(50);
+      return true;
+    } else if (upperCode === 'FIRST100') {
+      setCouponCode(upperCode);
+      setCouponDiscount(100);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const removeCoupon = useCallback(() => {
+    setCouponCode('');
+    setCouponDiscount(0);
+  }, []);
+
   const extraPhones = Math.max(0, items.length - BASE_PHONE_LIMIT);
   const extraPhoneCharge = extraPhones * EXTRA_PHONE_CHARGE;
-  const experienceDeposit = items.length > 0 ? BASE_DEPOSIT + extraPhoneCharge : 0;
-  const totalAmount = experienceDeposit;
+  const homeExperienceDeposit = items.length > 0 ? HOME_EXPERIENCE_DEPOSIT : 0;
+  const convenienceFee = items.length > 0 ? CONVENIENCE_FEE : 0;
+  const experienceDeposit = homeExperienceDeposit + convenienceFee + extraPhoneCharge;
+  const totalAmount = Math.max(0, experienceDeposit - couponDiscount);
 
   return (
     <CartContext.Provider
@@ -66,6 +99,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         itemCount: items.length,
         basePhones: BASE_PHONE_LIMIT,
         extraPhoneCharge,
+        couponCode,
+        couponDiscount,
+        applyCoupon,
+        removeCoupon,
+        homeExperienceDeposit,
+        convenienceFee,
       }}
     >
       {children}

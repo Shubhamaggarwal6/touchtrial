@@ -10,7 +10,7 @@ const steps = [
   {
     icon: Package,
     title: 'Get Delivered',
-    description: 'Pay a small deposit and receive up to 6 phones at your doorstep.',
+    description: 'Pay ₹499 (₹400 + ₹99 convenience) and receive up to 5 phones at your doorstep.',
     color: 'bg-accent/10 text-accent',
   },
   {
@@ -59,7 +59,7 @@ export function HowItWorks() {
         {/* Refund Notice */}
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary/10 border border-primary/20">
-            <span className="text-primary font-semibold">💰 Your ₹499 deposit is refunded when you purchase any phone</span>
+            <span className="text-primary font-semibold">💰 Your deposit is refunded when you purchase any phone</span>
           </div>
         </div>
       </div>
