@@ -9,14 +9,14 @@ const steps = [
   },
   {
     icon: Package,
-    title: 'Get Delivered',
-    description: 'Pay ₹499 (₹400 + ₹99 convenience) and receive up to 5 phones at your doorstep.',
+    title: 'Specialist Visit',
+    description: 'Pay ₹499 (₹400 deposit + ₹99 convenience). Our specialist delivers up to 5 phones and showcases them at your home.',
     color: 'bg-accent/10 text-accent',
   },
   {
     icon: CreditCard,
-    title: 'Buy or Return',
-    description: 'Love it? Buy and get your deposit refunded. Not for you? Simply return.',
+    title: '3-Day Trial & Decide',
+    description: 'Try the phones for 3 days. Love it? Buy and get your deposit refunded. Not for you? Simply return.',
     color: 'bg-primary/10 text-primary',
   },
 ];
