@@ -36,7 +36,7 @@ export function Header() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-hero">
             <Smartphone className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="hidden sm:inline">PhoneHome</span>
+          <span className="hidden sm:inline">TouchTrial</span>
         </Link>
 
         {/* Search Bar - Desktop */}

@@ -1,13 +1,33 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Trash2, ArrowRight, ShoppingBag, Tag, X } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { useCart } from '@/context/CartContext';
+import { toast } from '@/hooks/use-toast';
 
 const CartPage = () => {
-  const { items, removeFromCart, clearCart, experienceDeposit, totalAmount, basePhones, extraPhoneCharge, itemCount } = useCart();
+  const { 
+    items, 
+    removeFromCart, 
+    clearCart, 
+    totalAmount, 
+    basePhones, 
+    extraPhoneCharge, 
+    itemCount,
+    couponCode,
+    couponDiscount,
+    applyCoupon,
+    removeCoupon,
+    homeExperienceDeposit,
+    convenienceFee,
+    experienceDeposit,
+  } = useCart();
+  
+  const [couponInput, setCouponInput] = useState('');
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -15,6 +35,32 @@ const CartPage = () => {
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) {
+      toast({
+        title: 'Enter a coupon code',
+        description: 'Please enter a valid coupon code',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const success = applyCoupon(couponInput.trim());
+    if (success) {
+      toast({
+        title: 'Coupon applied!',
+        description: `Coupon ${couponInput.toUpperCase()} has been applied successfully`,
+      });
+      setCouponInput('');
+    } else {
+      toast({
+        title: 'Invalid coupon',
+        description: 'This coupon code is not valid',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (items.length === 0) {
@@ -112,9 +158,15 @@ const CartPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Home Experience (up to {basePhones} phones)
+                      Home Experience Deposit
                     </span>
-                    <span>₹499</span>
+                    <span>{formatPrice(homeExperienceDeposit)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Convenience Fee
+                    </span>
+                    <span>{formatPrice(convenienceFee)}</span>
                   </div>
                   {itemCount > basePhones && (
                     <div className="flex justify-between text-sm">
@@ -125,8 +177,50 @@ const CartPage = () => {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {itemCount} phone{itemCount > 1 ? 's' : ''} selected
+                    {itemCount} phone{itemCount > 1 ? 's' : ''} selected (up to {basePhones} included)
                   </p>
+                  
+                  <Separator />
+
+                  {/* Coupon Section */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      Have a coupon?
+                    </p>
+                    {couponCode ? (
+                      <div className="flex items-center justify-between p-2 bg-primary/10 border border-primary/20 rounded-lg">
+                        <span className="text-sm font-medium text-primary">{couponCode}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6"
+                          onClick={removeCoupon}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter coupon code"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button variant="outline" onClick={handleApplyCoupon}>
+                          Apply
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Coupon Discount</span>
+                      <span>-{formatPrice(couponDiscount)}</span>
+                    </div>
+                  )}
                   
                   <Separator />
                   
@@ -139,7 +233,7 @@ const CartPage = () => {
                 {/* Refund Notice */}
                 <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                   <p className="text-xs text-muted-foreground">
-                    💰 Deposit of {formatPrice(experienceDeposit)} will be refunded if you purchase any of these phones.
+                    💰 Deposit will be refunded if you purchase any of these phones.
                   </p>
                 </div>
 

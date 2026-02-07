@@ -39,7 +39,7 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            Skip the crowded stores. Select up to 6 phones, experience them at home, and only buy what you love. Your ₹499 deposit is refunded on purchase.
+            Skip the crowded stores. Select up to 5 phones, experience them at home for just ₹499 (₹400 home experience + ₹99 convenience). Your deposit is refunded on purchase.
           </p>
 
           {/* Search Bar */}
@@ -72,7 +72,7 @@ export function HeroSection() {
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-foreground">₹499</p>
-              <p className="text-sm text-muted-foreground">Up to 6 Phones</p>
+              <p className="text-sm text-muted-foreground">Up to 5 Phones</p>
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-foreground">100%</p>

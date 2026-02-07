@@ -20,11 +20,11 @@ const steps = [
     icon: Package,
     number: 2,
     title: 'Pay Deposit & Get Delivered',
-    description: 'Pay a refundable deposit of ₹499 for up to 6 phones. Need more? Add ₹69 per extra phone. Your selected phones will be delivered to your doorstep within 24-48 hours.',
+    description: 'Pay a refundable deposit of ₹499 (₹400 home experience + ₹99 convenience) for up to 5 phones. Need more? Add ₹69 per extra phone. Your selected phones will be delivered to your doorstep within 24-48 hours.',
     details: [
-      '₹499 deposit for up to 6 phones',
-      '₹69 per extra phone beyond 6',
-      'Free doorstep delivery',
+      '₹400 home experience deposit',
+      '₹99 convenience fee',
+      '₹69 per extra phone beyond 5',
       'Delivered within 24-48 hours'
     ]
   },
@@ -120,8 +120,12 @@ const HowItWorksPage = () => {
                 <p className="text-sm text-muted-foreground mb-2">3 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Up to 6 phones</span>
-                    <span>₹499</span>
+                    <span>Home Experience</span>
+                    <span>₹400</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Convenience Fee</span>
+                    <span>₹99</span>
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
@@ -131,11 +135,15 @@ const HowItWorksPage = () => {
               </div>
 
               <div className="bg-card rounded-xl p-4 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">8 Phones Experience</p>
+                <p className="text-sm text-muted-foreground mb-2">7 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Up to 6 phones</span>
-                    <span>₹499</span>
+                    <span>Home Experience</span>
+                    <span>₹400</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Convenience Fee</span>
+                    <span>₹99</span>
                   </div>
                   <div className="flex justify-between">
                     <span>2 extra phones × ₹69</span>
