@@ -38,9 +38,9 @@ const BookingSuccessPage = () => {
                     <Home className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">Home Experience</p>
+                    <p className="font-medium">3-Day Home Trial</p>
                     <p className="text-sm text-muted-foreground">
-                      Try the phones at home for up to 3 days. If you buy, the experience fee is refunded!
+                      Our specialist will showcase the phones. Keep them for 3 days—if you buy, your deposit is refunded!
                     </p>
                   </div>
                 </div>
