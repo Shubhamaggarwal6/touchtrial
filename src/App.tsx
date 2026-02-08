@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/context/CartContext";
+import { BuyCartProvider } from "@/context/BuyCartContext";
 import { CompareProvider } from "@/context/CompareContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CompareBar } from "@/components/compare/CompareBar";
@@ -11,6 +12,7 @@ import Index from "./pages/Index";
 import PhonesPage from "./pages/PhonesPage";
 import PhoneDetailPage from "./pages/PhoneDetailPage";
 import CartPage from "./pages/CartPage";
+import BuyCartPage from "./pages/BuyCartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import BookingSuccessPage from "./pages/BookingSuccessPage";
 import ComparePage from "./pages/ComparePage";
@@ -27,27 +29,30 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <CartProvider>
-          <CompareProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/phones" element={<PhonesPage />} />
-                <Route path="/phones/:id" element={<PhoneDetailPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/booking-success" element={<BookingSuccessPage />} />
-                <Route path="/compare" element={<ComparePage />} />
-                <Route path="/how-it-works" element={<HowItWorksPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/admin" element={<AdminDashboardPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <CompareBar />
-            </BrowserRouter>
-          </CompareProvider>
+          <BuyCartProvider>
+            <CompareProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/phones" element={<PhonesPage />} />
+                  <Route path="/phones/:id" element={<PhoneDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/buy-cart" element={<BuyCartPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/booking-success" element={<BookingSuccessPage />} />
+                  <Route path="/compare" element={<ComparePage />} />
+                  <Route path="/how-it-works" element={<HowItWorksPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/admin" element={<AdminDashboardPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <CompareBar />
+              </BrowserRouter>
+            </CompareProvider>
+          </BuyCartProvider>
         </CartProvider>
       </AuthProvider>
     </TooltipProvider>
