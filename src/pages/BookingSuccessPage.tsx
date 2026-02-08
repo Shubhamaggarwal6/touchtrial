@@ -38,9 +38,9 @@ const BookingSuccessPage = () => {
                     <Home className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">3-Day Home Trial</p>
+                    <p className="font-medium">Expert Home Demo</p>
                     <p className="text-sm text-muted-foreground">
-                      Our specialist will showcase the phones. Keep them for 3 days—if you buy, your deposit is refunded!
+                      Our specialist will give you a hands-on demo of all phones. If you buy, your deposit is refunded!
                     </p>
                   </div>
                 </div>

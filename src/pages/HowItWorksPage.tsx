@@ -20,24 +20,24 @@ const steps = [
     icon: Package,
     number: 2,
     title: 'Specialist Visits Your Home',
-    description: 'Pay a refundable deposit of ₹499 (₹400 deposit + ₹99 convenience) for up to 5 phones. Our specialist delivers the phones and provides a personalized showcase at your home.',
+    description: 'Pay a refundable deposit of ₹499 (₹400 deposit + ₹99 convenience) for up to 5 phones. Our specialist brings the phones and gives you a personalized hands-on demo at your doorstep.',
     details: [
       '₹400 refundable deposit',
       '₹99 convenience (₹69/extra phone)',
-      'Expert showcase at your doorstep',
-      'Delivered within 24-48 hours'
+      'Expert demo at your doorstep',
+      'Scheduled within 24-48 hours'
     ]
   },
   {
     icon: CreditCard,
     number: 3,
-    title: '3-Day Home Trial',
-    description: 'Keep the phones for 3 full days. Test cameras, feel the build quality, check displays, and experience performance in your daily routine—no pressure.',
+    title: 'Experience & Decide',
+    description: 'During the demo, test cameras, feel the build quality, check displays, and experience performance hands-on with our specialist guiding you.',
     details: [
-      'Full 3 days to decide',
-      'Test all features at your pace',
+      'Hands-on experience with expert',
+      'Test all features live',
       'Compare phones side by side',
-      'Use in real-life scenarios'
+      'Get answers to all your questions'
     ]
   },
   {
