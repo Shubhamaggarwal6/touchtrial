@@ -140,7 +140,7 @@ const PhoneDetailPage = () => {
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
               <p className="text-sm">
                 <span className="font-semibold text-primary">₹499 deposit</span>{' '}
-                for up to 6 phones, refunded on purchase.
+                for up to 5 phones, refunded on purchase.
               </p>
             </div>
 
