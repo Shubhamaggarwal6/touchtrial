@@ -1,20 +1,16 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Check, ChevronRight, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Plus, Check, ChevronRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { phones } from '@/data/phones';
 import { useCart } from '@/context/CartContext';
-import { useBuyCart } from '@/context/BuyCartContext';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 
 const PhoneDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { addToCart, removeFromCart, isInCart } = useCart();
-  const { addToCart: addToBuyCart } = useBuyCart();
   const [selectedImage, setSelectedImage] = useState(0);
   
   const phone = phones.find(p => p.id === id);
@@ -167,22 +163,6 @@ const PhoneDetailPage = () => {
                     Add to Home Experience
                   </>
                 )}
-              </Button>
-              <Button 
-                variant="hero" 
-                size="lg" 
-                className="flex-1"
-                onClick={() => {
-                  addToBuyCart(phone);
-                  toast({
-                    title: 'Added to cart!',
-                    description: `${phone.brand} ${phone.model} added to your purchase cart`,
-                  });
-                  navigate('/buy-cart');
-                }}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                Buy Now
               </Button>
             </div>
 
