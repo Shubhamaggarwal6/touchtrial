@@ -124,9 +124,13 @@ export const PhoneAdvisorChat = () => {
         setMessages([...newMessages, { role: 'assistant', content: assistantContent }]);
       }
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'Failed to get response';
+      const isRateLimit = errMsg.includes('429') || errMsg.includes('Rate limit') || errMsg.includes('non-2xx');
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to get response',
+        title: isRateLimit ? 'Rate limit reached' : 'Error',
+        description: isRateLimit
+          ? 'The AI service is temporarily busy. Please wait a moment and try again.'
+          : errMsg,
         variant: 'destructive',
       });
       if (!assistantContent) {
