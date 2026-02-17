@@ -3,15 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, Package, CheckCircle, XCircle, User } from 'lucide-react';
+import { Clock, Package, CheckCircle, XCircle, User, Phone, CalendarDays, MapPin } from 'lucide-react';
 
 export interface Booking {
   id: string;
   user_id: string;
   phone_ids: string[];
   phone_names: string[];
-  phone_variants: string[];
-  phone_colors: string[];
+  phone_variants: string[] | null;
+  phone_colors: string[] | null;
   total_experience_fee: number;
   convenience_fee: number;
   total_amount: number;
@@ -54,6 +54,9 @@ interface BookingCardProps {
 }
 
 export const BookingCard = ({ booking, updatingId, onStatusChange, onViewUserHistory }: BookingCardProps) => {
+  const variants = booking.phone_variants ?? [];
+  const colors = booking.phone_colors ?? [];
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -74,9 +77,14 @@ export const BookingCard = ({ booking, updatingId, onStatusChange, onViewUserHis
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {booking.user_email} • {booking.user_phone}
+              {booking.user_email}
             </p>
-            <p className="text-xs text-muted-foreground">
+            {/* Prominent phone number */}
+            <div className="flex items-center gap-1 mt-1">
+              <Phone className="w-3.5 h-3.5 text-primary" />
+              <span className="text-sm font-medium">{booking.user_phone || 'N/A'}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
               Booking #{booking.id.slice(0, 8)} • {format(new Date(booking.created_at), 'PPp')}
             </p>
           </div>
@@ -102,45 +110,63 @@ export const BookingCard = ({ booking, updatingId, onStatusChange, onViewUserHis
         </div>
       </CardHeader>
       <CardContent>
+        {/* Highlighted Delivery Schedule */}
+        <div className="bg-secondary/50 rounded-lg p-3 mb-4 flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4 text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground">Delivery Date</p>
+              <p className="text-sm font-semibold">
+                {booking.delivery_date ? format(new Date(booking.delivery_date), 'PPP') : 'Not set'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground">Time Slot</p>
+              <p className="text-sm font-semibold">{booking.time_slot || 'Not set'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground">Address</p>
+              <p className="text-sm font-semibold">{booking.delivery_address}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium mb-1">Phones</p>
-            <ul className="text-sm text-muted-foreground">
+            <ul className="text-sm text-muted-foreground space-y-1">
               {booking.phone_names.map((name, i) => (
                 <li key={i}>
                   • {name}
-                  {booking.phone_variants?.[i] && (
-                    <span className="ml-1 text-xs">({booking.phone_variants[i]})</span>
+                  {variants[i] && (
+                    <span className="ml-1 text-xs font-medium">({variants[i]})</span>
                   )}
-                  {booking.phone_colors?.[i] && (
-                    <span className="ml-1 text-xs italic">— {booking.phone_colors[i]}</span>
+                  {colors[i] && (
+                    <span className="ml-1 text-xs italic">— {colors[i]}</span>
                   )}
                 </li>
               ))}
             </ul>
           </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Delivery Address</p>
-            <p className="text-sm text-muted-foreground">{booking.delivery_address}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Delivery Schedule</p>
-            <p className="text-sm text-muted-foreground">
-              {booking.delivery_date ? format(new Date(booking.delivery_date), 'PPP') : 'Not set'}
-              {booking.time_slot ? ` • ${booking.time_slot}` : ''}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Payment</p>
-            <p className="text-sm text-muted-foreground capitalize">
-              {booking.payment_method || 'Not specified'}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Amount</p>
-            <p className="text-sm font-bold text-primary">
-              {formatPrice(booking.total_amount)}
-            </p>
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className="text-sm font-medium mb-1">Payment</p>
+              <p className="text-sm text-muted-foreground capitalize">
+                {booking.payment_method || 'Not specified'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-1">Amount</p>
+              <p className="text-sm font-bold text-primary">
+                {formatPrice(booking.total_amount)}
+              </p>
+            </div>
           </div>
         </div>
       </CardContent>
