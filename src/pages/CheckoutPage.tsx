@@ -31,7 +31,9 @@ const CheckoutPage = () => {
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
+  const [pincode, setPincode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [fullName, setFullName] = useState('');
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [timeSlot, setTimeSlot] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('upi');
@@ -55,10 +57,11 @@ const CheckoutPage = () => {
       if (user) {
         const { data } = await supabase
           .from('profiles')
-          .select('address, phone')
+          .select('full_name, address, phone')
           .eq('user_id', user.id)
           .maybeSingle();
         
+        if (data?.full_name) setFullName(data.full_name);
         if (data?.address) setAddress(data.address);
         if (data?.phone) setPhoneNumber(data.phone);
       }
@@ -81,6 +84,17 @@ const CheckoutPage = () => {
       toast({
         title: 'Valid phone number required',
         description: 'Please enter a valid 10-digit mobile number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate Gurugram pincode
+    const gurugramPincodes = ['122001', '122002', '122003', '122004', '122005', '122006', '122007', '122008', '122009', '122010', '122011', '122015', '122016', '122017', '122018', '122051', '122052', '122101', '122102', '122103', '122104', '122105', '122413', '122414'];
+    if (!pincode.trim() || !gurugramPincodes.includes(pincode.trim())) {
+      toast({
+        title: 'Invalid pincode',
+        description: 'We currently deliver only in Gurugram. Please enter a valid Gurugram pincode.',
         variant: 'destructive',
       });
       return;
@@ -194,6 +208,16 @@ const CheckoutPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="phone">Mobile Number</Label>
                     <Input
                       id="phone"
@@ -204,6 +228,21 @@ const CheckoutPage = () => {
                       required
                       maxLength={10}
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pincode">Pincode</Label>
+                    <Input
+                      id="pincode"
+                      type="text"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Enter Gurugram pincode (e.g. 122001)"
+                      required
+                      maxLength={6}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Currently available only in Gurugram
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Full Address</Label>
