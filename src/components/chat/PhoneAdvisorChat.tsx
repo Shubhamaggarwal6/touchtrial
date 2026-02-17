@@ -1,20 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, X, Send, Bot, User, Loader2, LogIn } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Loader2, LogIn, ShoppingBag, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { phones as phoneCatalog } from '@/data/phones';
+
+interface PhoneRecommendation {
+  phone_id: string;
+  reason: string;
+}
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  recommendations?: PhoneRecommendation[];
 }
 
 const MAX_MESSAGE_LENGTH = 1000;
 const MAX_MESSAGES_HISTORY = 20;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/phone-advisor`;
 
 export const PhoneAdvisorChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +34,7 @@ export const PhoneAdvisorChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user, session } = useAuth();
+  const { addToCart, isInCart } = useCart();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,110 +44,178 @@ export const PhoneAdvisorChat = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleAddToCart = (phoneId: string) => {
+    const phone = phoneCatalog.find(p => p.id === phoneId);
+    if (phone) {
+      addToCart(phone);
+      toast({ title: 'Added!', description: `${phone.brand} ${phone.model} added to Home Experience` });
+    }
+  };
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedInput = input.trim();
-    
     if (!trimmedInput || isLoading) return;
-    
-    // Validate message length
+
     if (trimmedInput.length > MAX_MESSAGE_LENGTH) {
-      toast({
-        title: 'Message too long',
-        description: `Please limit your message to ${MAX_MESSAGE_LENGTH} characters`,
-        variant: 'destructive',
-      });
+      toast({ title: 'Message too long', description: `Please limit to ${MAX_MESSAGE_LENGTH} characters`, variant: 'destructive' });
       return;
     }
 
     if (!session?.access_token) {
-      toast({
-        title: 'Authentication required',
-        description: 'Please sign in to use the phone advisor',
-        variant: 'destructive',
-      });
+      toast({ title: 'Authentication required', description: 'Please sign in to use the phone advisor', variant: 'destructive' });
       return;
     }
 
     const userMessage: Message = { role: 'user', content: trimmedInput };
-    
-    // Limit conversation history to prevent excessive data
     const recentMessages = messages.slice(-MAX_MESSAGES_HISTORY);
     const newMessages = [...recentMessages, userMessage];
-    
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
     let assistantContent = '';
+    let toolCallArgs = '';
+    let recommendations: PhoneRecommendation[] = [];
 
     try {
-      const { data, error } = await supabase.functions.invoke('phone-advisor', {
-        body: { messages: newMessages },
+      const resp = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to get response');
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || `Request failed (${resp.status})`);
       }
 
-      // Handle streaming response
-      if (data instanceof ReadableStream) {
-        const reader = data.getReader();
-        const decoder = new TextDecoder();
-        let textBuffer = '';
+      if (!resp.body) throw new Error('No response body');
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = '';
 
-          textBuffer += decoder.decode(value, { stream: true });
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
 
-          let newlineIndex: number;
-          while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-            let line = textBuffer.slice(0, newlineIndex);
-            textBuffer = textBuffer.slice(newlineIndex + 1);
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
 
-            if (line.endsWith('\r')) line = line.slice(0, -1);
-            if (line.startsWith(':') || line.trim() === '') continue;
-            if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
 
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const choice = parsed.choices?.[0];
+            if (!choice) continue;
 
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-              if (content) {
-                assistantContent += content;
-                setMessages([...newMessages, { role: 'assistant', content: assistantContent }]);
-              }
-            } catch {
-              textBuffer = line + '\n' + textBuffer;
-              break;
+            // Handle text content
+            const content = choice.delta?.content as string | undefined;
+            if (content) {
+              assistantContent += content;
+              setMessages([...newMessages, { role: 'assistant', content: assistantContent, recommendations }]);
             }
+
+            // Handle tool calls (function arguments arrive in chunks)
+            const toolCalls = choice.delta?.tool_calls;
+            if (toolCalls) {
+              for (const tc of toolCalls) {
+                if (tc.function?.arguments) {
+                  toolCallArgs += tc.function.arguments;
+                }
+              }
+            }
+
+            // Check finish_reason for tool_calls
+            if (choice.finish_reason === 'tool_calls' || choice.finish_reason === 'stop') {
+              if (toolCallArgs) {
+                try {
+                  const toolData = JSON.parse(toolCallArgs);
+                  if (toolData.recommendations) {
+                    recommendations = toolData.recommendations;
+                    setMessages([...newMessages, { role: 'assistant', content: assistantContent, recommendations }]);
+                  }
+                } catch { /* partial args */ }
+                toolCallArgs = '';
+              }
+            }
+          } catch {
+            textBuffer = line + '\n' + textBuffer;
+            break;
           }
         }
-      } else if (typeof data === 'string') {
-        // Handle non-streaming response
-        assistantContent = data;
-        setMessages([...newMessages, { role: 'assistant', content: assistantContent }]);
+      }
+
+      // Final parse attempt for tool args
+      if (toolCallArgs) {
+        try {
+          const toolData = JSON.parse(toolCallArgs);
+          if (toolData.recommendations) {
+            recommendations = toolData.recommendations;
+          }
+        } catch { /* ignore */ }
+      }
+
+      // Ensure final message is set
+      if (assistantContent || recommendations.length > 0) {
+        setMessages([...newMessages, { role: 'assistant', content: assistantContent || "Here are my recommendations:", recommendations }]);
       }
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : 'Failed to get response';
-      const isRateLimit = errMsg.includes('429') || errMsg.includes('Rate limit') || errMsg.includes('non-2xx');
+      const isRateLimit = errMsg.includes('429') || errMsg.includes('Rate limit');
       toast({
         title: isRateLimit ? 'Rate limit reached' : 'Error',
-        description: isRateLimit
-          ? 'The AI service is temporarily busy. Please wait a moment and try again.'
-          : errMsg,
+        description: isRateLimit ? 'Please wait a moment and try again.' : errMsg,
         variant: 'destructive',
       });
-      if (!assistantContent) {
-        setMessages(newMessages);
-      }
+      if (!assistantContent) setMessages(newMessages);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const PhoneCard = ({ rec }: { rec: PhoneRecommendation }) => {
+    const phone = phoneCatalog.find(p => p.id === rec.phone_id);
+    if (!phone) return null;
+    const inCart = isInCart(phone.id);
+
+    return (
+      <div className="bg-background border border-border rounded-xl p-3 mt-2 flex gap-3 items-center">
+        <img src={phone.image} alt={phone.model} className="w-14 h-14 object-contain rounded-lg bg-muted p-1" />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold truncate">{phone.brand} {phone.model}</p>
+          <p className="text-xs text-muted-foreground">₹{phone.price.toLocaleString('en-IN')}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{rec.reason}</p>
+        </div>
+        <Button
+          size="sm"
+          variant={inCart ? "secondary" : "default"}
+          className="text-[10px] h-7 px-2 shrink-0"
+          onClick={() => !inCart && handleAddToCart(phone.id)}
+          disabled={inCart}
+        >
+          {inCart ? (
+            <><ShoppingBag className="h-3 w-3 mr-1" /> Added</>
+          ) : (
+            <><Plus className="h-3 w-3 mr-1" /> Try at Home</>
+          )}
+        </Button>
+      </div>
+    );
   };
 
   return (
@@ -173,15 +250,10 @@ export const PhoneAdvisorChat = () => {
             </div>
             <div>
               <h3 className="font-semibold">Phone Advisor</h3>
-              <p className="text-xs opacity-80">Ask me anything about phones</p>
+              <p className="text-xs opacity-80">AI-powered recommendations</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsOpen(false)}
-            className="text-primary-foreground hover:bg-primary-foreground/20"
-          >
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-primary-foreground hover:bg-primary-foreground/20">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -202,36 +274,27 @@ export const PhoneAdvisorChat = () => {
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "flex gap-3",
-                    message.role === 'user' ? "flex-row-reverse" : ""
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
-                      message.role === 'user'
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
-                    {message.role === 'user' ? (
-                      <User className="h-4 w-4" />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
+                <div key={i} className={cn("flex gap-3", message.role === 'user' ? "flex-row-reverse" : "")}>
+                  <div className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
+                    message.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted"
+                  )}>
+                    {message.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                   </div>
-                  <div
-                    className={cn(
-                      "max-w-[75%] rounded-2xl px-4 py-2 text-sm",
-                      message.role === 'user'
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted rounded-bl-md"
-                    )}
-                  >
+                  <div className={cn(
+                    "max-w-[75%] rounded-2xl px-4 py-2 text-sm",
+                    message.role === 'user'
+                      ? "bg-primary text-primary-foreground rounded-br-md"
+                      : "bg-muted rounded-bl-md"
+                  )}>
                     <p className="whitespace-pre-wrap">{message.content}</p>
+                    {message.recommendations && message.recommendations.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {message.recommendations.map((rec, j) => (
+                          <PhoneCard key={j} rec={rec} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
