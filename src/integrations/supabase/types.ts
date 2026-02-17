@@ -22,8 +22,10 @@ export type Database = {
           delivery_date: string | null
           id: string
           payment_method: string | null
+          phone_colors: string[] | null
           phone_ids: string[]
           phone_names: string[]
+          phone_variants: string[] | null
           status: string
           time_slot: string | null
           total_amount: number
@@ -38,8 +40,10 @@ export type Database = {
           delivery_date?: string | null
           id?: string
           payment_method?: string | null
+          phone_colors?: string[] | null
           phone_ids: string[]
           phone_names: string[]
+          phone_variants?: string[] | null
           status?: string
           time_slot?: string | null
           total_amount: number
@@ -54,8 +58,10 @@ export type Database = {
           delivery_date?: string | null
           id?: string
           payment_method?: string | null
+          phone_colors?: string[] | null
           phone_ids?: string[]
           phone_names?: string[]
+          phone_variants?: string[] | null
           status?: string
           time_slot?: string | null
           total_amount?: number
