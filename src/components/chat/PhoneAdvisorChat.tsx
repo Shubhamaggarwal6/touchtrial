@@ -436,9 +436,9 @@ export const PhoneAdvisorChat = () => {
 
               {/* Onboarding: Budget */}
               {onboardingStep === 'budget' && !isLoading && (
-                <div className="flex flex-wrap gap-2 pl-11">
+                <div className="grid grid-cols-2 gap-2 pl-11">
                   {BUDGET_OPTIONS.map(opt => (
-                    <Button key={opt.value} variant="outline" size="sm" className="text-xs h-8 rounded-full" onClick={() => handleBudgetSelect(opt.value, opt.label)}>
+                    <Button key={opt.value} variant="outline" size="sm" className="text-xs h-8 rounded-full w-full" onClick={() => handleBudgetSelect(opt.value, opt.label)}>
                       {opt.label}
                     </Button>
                   ))}
@@ -448,12 +448,12 @@ export const PhoneAdvisorChat = () => {
               {/* Onboarding: Priority */}
               {onboardingStep === 'priority' && !isLoading && (
                 <div className="pl-11 space-y-2">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {PRIORITY_OPTIONS.map(opt => {
                       const Icon = opt.icon;
                       const selected = selectedPriorities.includes(opt.value);
                       return (
-                        <Button key={opt.value} variant={selected ? "default" : "outline"} size="sm" className="text-xs h-8 rounded-full gap-1" onClick={() => togglePriority(opt.value)}>
+                        <Button key={opt.value} variant={selected ? "default" : "outline"} size="sm" className="text-xs h-8 rounded-full gap-1 w-full" onClick={() => togglePriority(opt.value)}>
                           <Icon className="h-3 w-3" /> {opt.label}
                         </Button>
                       );
@@ -468,11 +468,11 @@ export const PhoneAdvisorChat = () => {
               {/* Onboarding: Brand */}
               {onboardingStep === 'brand' && !isLoading && (
                 <div className="pl-11 space-y-2">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {BRAND_OPTIONS.map(opt => {
                       const selected = selectedBrands.includes(opt.value);
                       return (
-                        <Button key={opt.value} variant={selected ? "default" : "outline"} size="sm" className="text-xs h-8 rounded-full" onClick={() => toggleBrand(opt.value)}>
+                        <Button key={opt.value} variant={selected ? "default" : "outline"} size="sm" className="text-xs h-8 rounded-full w-full" onClick={() => toggleBrand(opt.value)}>
                           {opt.label}
                         </Button>
                       );
