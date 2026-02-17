@@ -31,6 +31,7 @@ const CheckoutPage = () => {
   const { user, loading: authLoading } = useAuth();
   
   const [address, setAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [timeSlot, setTimeSlot] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('upi');
@@ -54,13 +55,12 @@ const CheckoutPage = () => {
       if (user) {
         const { data } = await supabase
           .from('profiles')
-          .select('address')
+          .select('address, phone')
           .eq('user_id', user.id)
           .maybeSingle();
         
-        if (data?.address) {
-          setAddress(data.address);
-        }
+        if (data?.address) setAddress(data.address);
+        if (data?.phone) setPhoneNumber(data.phone);
       }
     };
     fetchProfile();
@@ -77,6 +77,15 @@ const CheckoutPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!phoneNumber.trim() || !/^[6-9]\d{9}$/.test(phoneNumber.trim())) {
+      toast({
+        title: 'Valid phone number required',
+        description: 'Please enter a valid 10-digit mobile number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!address.trim()) {
       toast({
         title: 'Address required',
@@ -120,6 +129,12 @@ const CheckoutPage = () => {
       const phoneNames = items.map(item => `${item.phone.brand} ${item.phone.model}`);
       const phoneVariants = items.map(item => item.selectedVariant || '');
       const phoneColors = items.map(item => item.selectedColor || '');
+
+      // Save phone number to profile
+      await supabase
+        .from('profiles')
+        .update({ phone: phoneNumber.trim(), address: address.trim() })
+        .eq('user_id', user.id);
 
       const { error } = await supabase.from('bookings').insert({
         user_id: user.id,
@@ -172,12 +187,24 @@ const CheckoutPage = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Delivery Address */}
+              {/* Contact & Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Delivery Address</CardTitle>
+                  <CardTitle>Contact & Delivery</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Mobile Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="Enter your 10-digit mobile number"
+                      required
+                      maxLength={10}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Full Address</Label>
                     <Input
