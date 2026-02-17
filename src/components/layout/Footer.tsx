@@ -69,7 +69,7 @@ export function Footer() {
               </a>
               <p className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                Mumbai, Maharashtra, India
+                Gurugram, Haryana, India
               </p>
             </div>
           </div>
