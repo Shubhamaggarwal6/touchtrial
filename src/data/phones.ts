@@ -48,7 +48,7 @@ export const phones: Phone[] = [
     id: "iphone-15-pro-max",
     brand: "Apple",
     model: "iPhone 15 Pro Max",
-    price: 159900,
+    price: 2000,
     image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&h=400&fit=crop",
     ram: "8GB",
     storage: "256GB",
