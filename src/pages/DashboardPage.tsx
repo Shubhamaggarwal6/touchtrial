@@ -17,13 +17,15 @@ interface Booking {
   id: string;
   phone_ids: string[];
   phone_names: string[];
-  phone_variants: string[];
-  phone_colors: string[];
+  phone_variants: string[] | null;
+  phone_colors: string[] | null;
   total_experience_fee: number;
   convenience_fee: number;
   total_amount: number;
   status: string;
   delivery_address: string;
+  delivery_date: string | null;
+  time_slot: string | null;
   payment_method: string | null;
   created_at: string;
 }
@@ -274,6 +276,9 @@ function BookingCard({
   booking: Booking; 
   getStatusBadge: (status: string) => React.ReactNode;
 }) {
+  const variants = booking.phone_variants ?? [];
+  const colors = booking.phone_colors ?? [];
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -291,14 +296,34 @@ function BookingCard({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {/* Delivery Schedule Highlight */}
+          <div className="bg-secondary/50 rounded-lg p-3 flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Delivery Date</p>
+                <p className="text-sm font-semibold">
+                  {booking.delivery_date ? format(new Date(booking.delivery_date), 'PPP') : 'Not set'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Time Slot</p>
+                <p className="text-sm font-semibold">{booking.time_slot || 'Not set'}</p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <p className="text-sm text-muted-foreground mb-1">Phones</p>
             <div className="flex flex-wrap gap-2">
               {booking.phone_names.map((name, idx) => (
                 <Badge key={idx} variant="outline">
                   {name}
-                  {booking.phone_variants?.[idx] && ` (${booking.phone_variants[idx]})`}
-                  {booking.phone_colors?.[idx] && ` — ${booking.phone_colors[idx]}`}
+                  {variants[idx] && ` (${variants[idx]})`}
+                  {colors[idx] && ` — ${colors[idx]}`}
                 </Badge>
               ))}
             </div>
