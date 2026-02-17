@@ -1,4 +1,4 @@
-this is my code export interface PhoneVariant {
+export interface PhoneVariant {
   ram: string;
   storage: string;
   price: number;
@@ -419,4 +419,4 @@ export const phones: Phone[] = [
 ];
 
 export const brands = [...new Set(phones.map(p => p.brand))];
-export const operatingSystems: ('Android' | 'iOS')[] = ['Android', 'iOS']; add latest 50 codes
+export const operatingSystems: ('Android' | 'iOS')[] = ['Android', 'iOS'];
