@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { Smartphone, Mail, Lock, User, ArrowRight, Eye, EyeOff, Phone } from 'lucide-react';
+import { Smartphone, Mail, Lock, User, ArrowRight, Eye, EyeOff, Phone, CheckCircle } from 'lucide-react';
 import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -33,6 +35,13 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // OTP state
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -43,6 +52,64 @@ export default function AuthPage() {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = setInterval(() => setOtpCooldown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [otpCooldown]);
+
+  // Reset OTP state when phone number changes
+  useEffect(() => {
+    setOtpSent(false);
+    setOtpValue('');
+    setPhoneVerified(false);
+  }, [phoneNumber]);
+
+  const handleSendOtp = async () => {
+    if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
+      setErrors((prev) => ({ ...prev, phone: 'Please enter a valid 10-digit mobile number' }));
+      return;
+    }
+    setErrors((prev) => {
+      const { phone, ...rest } = prev;
+      return rest;
+    });
+    setOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: { phone: phoneNumber },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setOtpSent(true);
+      setOtpCooldown(30);
+      toast({ title: 'OTP Sent', description: 'A 6-digit code has been sent to your phone.' });
+    } catch (err: any) {
+      toast({ title: 'Failed to send OTP', description: err.message || 'Please try again.', variant: 'destructive' });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpValue.length !== 6) return;
+    setOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
+        body: { phone: phoneNumber, otp: otpValue },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setPhoneVerified(true);
+      toast({ title: 'Phone Verified!', description: 'Your mobile number has been verified.' });
+    } catch (err: any) {
+      toast({ title: 'Verification Failed', description: err.message || 'Invalid or expired OTP.', variant: 'destructive' });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +122,7 @@ export default function AuthPage() {
         if (!result.success) {
           const fieldErrors: Record<string, string> = {};
           result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
+            if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
           });
           setErrors(fieldErrors);
           setIsLoading(false);
@@ -74,20 +139,22 @@ export default function AuthPage() {
             variant: 'destructive',
           });
         } else {
-          toast({
-            title: 'Welcome back!',
-            description: 'You have successfully logged in.',
-          });
+          toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
           navigate('/');
         }
       } else {
+        // Require phone verification for signup
+        if (!phoneVerified) {
+          toast({ title: 'Phone not verified', description: 'Please verify your mobile number before signing up.', variant: 'destructive' });
+          setIsLoading(false);
+          return;
+        }
+
         const result = signupSchema.safeParse({ fullName, email, phone: phoneNumber, gender, password });
         if (!result.success) {
           const fieldErrors: Record<string, string> = {};
           result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
+            if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
           });
           setErrors(fieldErrors);
           setIsLoading(false);
@@ -97,31 +164,16 @@ export default function AuthPage() {
         const { error: signUpError } = await signUp(email, password, fullName, phoneNumber, gender);
         if (signUpError) {
           if (signUpError.message.includes('already registered')) {
-            toast({
-              title: 'Account Exists',
-              description: 'This email is already registered. Please login instead.',
-              variant: 'destructive',
-            });
+            toast({ title: 'Account Exists', description: 'This email is already registered. Please login instead.', variant: 'destructive' });
           } else {
-            toast({
-              title: 'Signup Failed',
-              description: signUpError.message,
-              variant: 'destructive',
-            });
+            toast({ title: 'Signup Failed', description: signUpError.message, variant: 'destructive' });
           }
         } else {
-          toast({
-            title: 'Check your email!',
-            description: 'We sent a verification link to your email. Please verify to complete signup.',
-          });
+          toast({ title: 'Check your email!', description: 'We sent a verification link to your email. Please verify to complete signup.' });
         }
       }
     } catch {
-      toast({
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -137,9 +189,7 @@ export default function AuthPage() {
               <Smartphone className="h-10 w-10 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-primary-foreground mb-4">
-            PhoneHome
-          </h1>
+          <h1 className="text-4xl font-bold text-primary-foreground mb-4">PhoneHome</h1>
           <p className="text-xl text-primary-foreground/80 mb-8">
             Try smartphones at home before you buy. No more guesswork, just confidence.
           </p>
@@ -191,57 +241,87 @@ export default function AuthPage() {
                   <Label htmlFor="fullName">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
+                    <Input id="fullName" type="text" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10" disabled={isLoading} />
                   </div>
-                  {errors.fullName && (
-                    <p className="text-sm text-destructive">{errors.fullName}</p>
-                  )}
+                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <Select value={gender} onValueChange={setGender} disabled={isLoading}>
-                    <SelectTrigger id="gender">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
+                    <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="female">Female</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.gender && (
-                    <p className="text-sm text-destructive">{errors.gender}</p>
-                  )}
+                  {errors.gender && <p className="text-sm text-destructive">{errors.gender}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phoneNumber"
-                      type="tel"
-                      placeholder="9876543210"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="pl-10"
-                      disabled={isLoading}
-                      maxLength={10}
-                    />
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="9876543210"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        className="pl-10"
+                        disabled={isLoading || phoneVerified}
+                        maxLength={10}
+                      />
+                    </div>
+                    {phoneVerified ? (
+                      <div className="flex items-center gap-1 text-sm font-medium text-green-600 px-3">
+                        <CheckCircle className="h-4 w-4" />
+                        Verified
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 h-10"
+                        disabled={otpLoading || otpCooldown > 0 || phoneNumber.length !== 10}
+                        onClick={handleSendOtp}
+                      >
+                        {otpLoading ? 'Sending...' : otpCooldown > 0 ? `Resend (${otpCooldown}s)` : otpSent ? 'Resend OTP' : 'Send OTP'}
+                      </Button>
+                    )}
                   </div>
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
-                  )}
+                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                 </div>
+
+                {/* OTP Input */}
+                {otpSent && !phoneVerified && (
+                  <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
+                    <Label>Enter OTP sent to your phone</Label>
+                    <div className="flex items-center gap-3">
+                      <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={otpValue.length !== 6 || otpLoading}
+                        onClick={handleVerifyOtp}
+                      >
+                        {otpLoading ? 'Verifying...' : 'Verify'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
@@ -249,56 +329,30 @@ export default function AuthPage() {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={isLoading}
-                />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" disabled={isLoading} />
               </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" disabled={isLoading} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={isLoading}>
+            <Button type="submit" className="w-full gap-2" disabled={isLoading || (!isLogin && !phoneVerified)}>
               {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
               <ArrowRight className="h-4 w-4" />
             </Button>
 
             <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
@@ -315,11 +369,7 @@ export default function AuthPage() {
                   redirect_uri: window.location.origin,
                 });
                 if (error) {
-                  toast({
-                    title: 'Google Sign-In Failed',
-                    description: error.message || 'Something went wrong.',
-                    variant: 'destructive',
-                  });
+                  toast({ title: 'Google Sign-In Failed', description: error.message || 'Something went wrong.', variant: 'destructive' });
                   setIsLoading(false);
                 }
               }}
@@ -337,14 +387,7 @@ export default function AuthPage() {
           <div className="text-center">
             <p className="text-muted-foreground">
               {isLogin ? "Don't have an account?" : 'Already have an account?'}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setErrors({});
-                }}
-                className="ml-1 text-primary font-medium hover:underline"
-              >
+              <button type="button" onClick={() => { setIsLogin(!isLogin); setErrors({}); }} className="ml-1 text-primary font-medium hover:underline">
                 {isLogin ? 'Sign up' : 'Sign in'}
               </button>
             </p>
