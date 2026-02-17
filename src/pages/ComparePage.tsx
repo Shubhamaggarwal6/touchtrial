@@ -135,7 +135,7 @@ export default function ComparePage() {
                         <p className="text-sm font-medium">
                           {spec.format 
                             ? spec.format(phone[spec.key] as number)
-                            : phone[spec.key]
+                            : String(phone[spec.key])
                           }
                         </p>
                       </div>
