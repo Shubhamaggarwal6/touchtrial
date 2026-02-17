@@ -1,5 +1,5 @@
 import { Layout } from '@/components/layout/Layout';
-import { Search, Package, CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, Package, CreditCard, CheckCircle2, ArrowRight, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -20,10 +20,10 @@ const steps = [
     icon: Package,
     number: 2,
     title: 'Specialist Visits Your Home',
-    description: 'Pay a refundable deposit of ₹499 (₹400 deposit + ₹99 convenience) for up to 5 phones. Our specialist brings the phones and gives you a personalized hands-on demo at your doorstep.',
+    description: 'Pay just ₹299 (₹199 refundable deposit + ₹100 convenience) for up to 5 phones. Our specialist brings the phones and gives you a personalized hands-on demo at your doorstep.',
     details: [
-      '₹400 refundable deposit',
-      '₹99 convenience (₹69/extra phone)',
+      '₹199 refundable deposit',
+      '₹100 convenience fee',
       'Expert demo at your doorstep',
       'Scheduled within 24-48 hours'
     ]
@@ -41,15 +41,15 @@ const steps = [
     ]
   },
   {
-    icon: CheckCircle2,
+    icon: Truck,
     number: 4,
-    title: 'Buy or Return',
-    description: 'Love a phone? Purchase it and your deposit gets refunded. Not satisfied? Simply return all phones with free pickup. No questions asked.',
+    title: 'Buy at Delivery or Return',
+    description: 'Love a phone? Our specialist delivers it to you — pay at the time of delivery and your deposit is refunded instantly. Not satisfied? Simply return all phones. No questions asked.',
     details: [
+      'Pay for the phone at delivery',
       'Full deposit refund on purchase',
       'Free pickup for returns',
-      'No hidden charges',
-      'Hassle-free process'
+      'No hidden charges'
     ]
   },
 ];
@@ -120,16 +120,16 @@ const HowItWorksPage = () => {
                 <p className="text-sm text-muted-foreground mb-2">3 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Home Experience</span>
-                    <span>₹400</span>
+                    <span>Home Experience Deposit</span>
+                    <span>₹199</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Convenience Fee</span>
-                    <span>₹99</span>
+                    <span>₹100</span>
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹499</span>
+                    <span>₹299</span>
                   </div>
                 </div>
               </div>
@@ -138,12 +138,12 @@ const HowItWorksPage = () => {
                 <p className="text-sm text-muted-foreground mb-2">7 Phones Experience</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Home Experience</span>
-                    <span>₹400</span>
+                    <span>Home Experience Deposit</span>
+                    <span>₹199</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Convenience Fee</span>
-                    <span>₹99</span>
+                    <span>₹100</span>
                   </div>
                   <div className="flex justify-between">
                     <span>2 extra phones × ₹69</span>
@@ -151,7 +151,7 @@ const HowItWorksPage = () => {
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹637</span>
+                    <span>₹437</span>
                   </div>
                 </div>
               </div>

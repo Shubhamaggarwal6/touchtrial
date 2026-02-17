@@ -24,8 +24,8 @@ interface CartContextType {
   convenienceFee: number;
 }
 
-const HOME_EXPERIENCE_DEPOSIT = 400;
-const CONVENIENCE_FEE = 99;
+const HOME_EXPERIENCE_DEPOSIT = 199;
+const CONVENIENCE_FEE = 100;
 const BASE_PHONE_LIMIT = 5;
 const EXTRA_PHONE_CHARGE = 69;
 

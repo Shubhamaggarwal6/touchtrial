@@ -10,13 +10,13 @@ const steps = [
   {
     icon: Package,
     title: 'Specialist Demo',
-    description: 'Pay ₹499 (₹400 deposit + ₹99 convenience). Our specialist brings up to 5 phones and gives you a personalized hands-on demo at your home.',
+    description: 'Pay ₹299 (₹199 deposit + ₹100 convenience). Our specialist brings up to 5 phones and gives you a personalized hands-on demo at your home.',
     color: 'bg-accent/10 text-accent',
   },
   {
     icon: CreditCard,
-    title: 'Decide & Buy',
-    description: 'Experience each phone during the demo. Love one? Buy it and get your deposit refunded. Not convinced? No worries!',
+    title: 'Buy at Delivery',
+    description: 'Love a phone? Pay at the time of delivery and your deposit is refunded. Not convinced? Simply return — no questions asked!',
     color: 'bg-primary/10 text-primary',
   },
 ];

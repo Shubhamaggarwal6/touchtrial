@@ -193,10 +193,13 @@ const PhoneDetailPage = () => {
             </div>
 
             {/* Deposit Notice */}
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
               <p className="text-sm">
-                <span className="font-semibold text-primary">₹499 deposit</span>{' '}
-                for up to 5 phones, refunded on purchase.
+                <span className="font-semibold text-primary">₹299 for home experience</span>{' '}
+                (₹199 deposit + ₹100 convenience) for up to 5 phones.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Love it? Buy it! Pay at delivery &amp; your deposit is refunded.
               </p>
             </div>
 
