@@ -19,6 +19,16 @@ const PhoneDetailPage = () => {
   const [selectedVariant, setSelectedVariant] = useState<number>(0);
   const [selectedColor, setSelectedColor] = useState<number>(0);
 
+  // Update cart when variant/color changes if phone is already in cart
+  const updateCartSelection = (variantIdx: number, colorIdx: number) => {
+    if (phone && isInCart(phone.id)) {
+      const v = phone.variants[variantIdx] || phone.variants[0];
+      const variantLabel = `${v.ram} / ${v.storage}`;
+      const colorLabel = phone.colors[colorIdx]?.name || '';
+      addToCart(phone, variantLabel, colorLabel);
+    }
+  };
+
   if (!phone) {
     return (
       <Layout>
@@ -143,7 +153,7 @@ const PhoneDetailPage = () => {
                   {phone.colors.map((color, index) => (
                     <button
                       key={color.name}
-                      onClick={() => setSelectedColor(index)}
+                      onClick={() => { setSelectedColor(index); updateCartSelection(selectedVariant, index); }}
                       className={`relative w-10 h-10 rounded-full border-2 transition-all ${
                         selectedColor === index
                           ? 'border-primary ring-2 ring-primary/30 scale-110'
@@ -167,7 +177,7 @@ const PhoneDetailPage = () => {
                   {phone.variants.map((variant, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedVariant(index)}
+                      onClick={() => { setSelectedVariant(index); updateCartSelection(index, selectedColor); }}
                       className={`px-4 py-3 rounded-xl border-2 text-left transition-all ${
                         selectedVariant === index
                           ? 'border-primary bg-primary/5'

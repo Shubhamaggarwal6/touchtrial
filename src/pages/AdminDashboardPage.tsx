@@ -30,6 +30,7 @@ interface Booking {
   created_at: string;
   user_email?: string;
   user_name?: string;
+  user_phone?: string;
 }
 
 const AdminDashboardPage = () => {
@@ -83,13 +84,15 @@ const AdminDashboardPage = () => {
           (bookingsData || []).map(async (booking) => {
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('full_name')
+              .select('full_name, phone, email')
               .eq('user_id', booking.user_id)
               .maybeSingle();
 
             return {
               ...booking,
               user_name: profileData?.full_name || 'Unknown User',
+              user_phone: profileData?.phone || 'N/A',
+              user_email: profileData?.email || 'N/A',
             };
           })
         );
@@ -263,6 +266,9 @@ const AdminDashboardPage = () => {
                             {booking.user_name}
                           </CardTitle>
                           <p className="text-sm text-muted-foreground">
+                            {booking.user_email} • {booking.user_phone}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
                             Booking #{booking.id.slice(0, 8)} • {format(new Date(booking.created_at), 'PPp')}
                           </p>
                         </div>
