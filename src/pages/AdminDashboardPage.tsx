@@ -7,9 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Download } from 'lucide-react';
 import { BookingCard, type Booking } from '@/components/admin/BookingCard';
 import { UserHistoryDialog } from '@/components/admin/UserHistoryDialog';
+import { format } from 'date-fns';
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -109,6 +110,34 @@ const AdminDashboardPage = () => {
     return bookings.filter(b => b.status === status);
   };
 
+  const exportCSV = () => {
+    const headers = ['Booking ID', 'User Name', 'Email', 'Phone Number', 'Phones', 'Variants', 'Colors', 'Delivery Date', 'Time Slot', 'Delivery Address', 'Payment Method', 'Amount', 'Status', 'Booked On'];
+    const rows = bookings.map(b => [
+      b.id.slice(0, 8),
+      b.user_name || '',
+      b.user_email || '',
+      b.user_phone || '',
+      (b.phone_names || []).join('; '),
+      (b.phone_variants ?? []).join('; '),
+      (b.phone_colors ?? []).join('; '),
+      b.delivery_date ? format(new Date(b.delivery_date), 'PPP') : '',
+      b.time_slot || '',
+      b.delivery_address,
+      b.payment_method || '',
+      b.total_amount,
+      b.status,
+      format(new Date(b.created_at), 'PPp'),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const userBookings = historyUserId ? bookings.filter(b => b.user_id === historyUserId) : [];
 
   if (authLoading || loading) {
@@ -131,9 +160,14 @@ const AdminDashboardPage = () => {
             <h1 className="text-3xl md:text-4xl font-bold">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage all customer bookings</p>
           </div>
-          <Button variant="outline" onClick={() => window.location.reload()}>
-            <RefreshCw className="h-4 w-4 mr-2" />Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportCSV}>
+              <Download className="h-4 w-4 mr-2" />Export CSV
+            </Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
