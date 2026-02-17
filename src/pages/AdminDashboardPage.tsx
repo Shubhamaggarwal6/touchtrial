@@ -24,6 +24,8 @@ interface Booking {
   total_amount: number;
   status: string;
   delivery_address: string;
+  delivery_date: string | null;
+  time_slot: string | null;
   payment_method: string | null;
   created_at: string;
   user_email?: string;
@@ -306,6 +308,13 @@ const AdminDashboardPage = () => {
                         <div>
                           <p className="text-sm font-medium mb-1">Delivery Address</p>
                           <p className="text-sm text-muted-foreground">{booking.delivery_address}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-1">Delivery Schedule</p>
+                          <p className="text-sm text-muted-foreground">
+                            {booking.delivery_date ? format(new Date(booking.delivery_date), 'PPP') : 'Not set'}
+                            {booking.time_slot ? ` • ${booking.time_slot}` : ''}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium mb-1">Payment</p>
