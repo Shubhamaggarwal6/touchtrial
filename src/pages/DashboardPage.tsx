@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw, Mail, Phone, MapPin } from 'lucide-react';
+import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw, Mail, Phone, MapPin, Download, Shield } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +43,7 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -60,6 +61,16 @@ export default function DashboardPage() {
     if (!user) return;
     
     try {
+      // Check admin role
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!roleData);
+
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
@@ -90,6 +101,31 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportCSV = () => {
+    const headers = ['Booking ID', 'Phones', 'Variants', 'Colors', 'Delivery Date', 'Time Slot', 'Delivery Address', 'Payment Method', 'Amount', 'Status', 'Booked On'];
+    const rows = bookings.map(b => [
+      b.id.slice(0, 8),
+      (b.phone_names || []).join('; '),
+      (b.phone_variants ?? []).join('; '),
+      (b.phone_colors ?? []).join('; '),
+      b.delivery_date ? format(new Date(b.delivery_date), 'PPP') : '',
+      b.time_slot || '',
+      b.delivery_address,
+      b.payment_method || '',
+      b.total_amount,
+      b.status,
+      format(new Date(b.created_at), 'PPp'),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `my-bookings-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const getStatusBadge = (status: string) => {
@@ -146,7 +182,17 @@ export default function DashboardPage() {
               Welcome back, {profile?.full_name || user.email}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            {isAdmin && (
+              <Button variant="outline" onClick={() => navigate('/admin')} className="gap-2">
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </Button>
+            )}
+            <Button variant="outline" onClick={exportCSV} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
             <Button variant="outline" onClick={() => navigate('/phones')} className="gap-2">
               <Smartphone className="h-4 w-4" />
               Browse Phones
