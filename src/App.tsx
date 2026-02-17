@@ -18,6 +18,7 @@ import BookingSuccessPage from "./pages/BookingSuccessPage";
 import ComparePage from "./pages/ComparePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import NotFound from "./pages/NotFound";
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/how-it-works" element={<HowItWorksPage />} />
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminDashboardPage />} />
                   <Route path="*" element={<NotFound />} />

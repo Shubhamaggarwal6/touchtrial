@@ -36,12 +36,24 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // OTP state
+  // Phone OTP state
   const [otpSent, setOtpSent] = useState(false);
   const [otpValue, setOtpValue] = useState('');
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpCooldown, setOtpCooldown] = useState(0);
+
+  // Email OTP state
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailOtpValue, setEmailOtpValue] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailOtpLoading, setEmailOtpLoading] = useState(false);
+  const [emailOtpCooldown, setEmailOtpCooldown] = useState(0);
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -53,29 +65,38 @@ export default function AuthPage() {
     }
   }, [user, navigate]);
 
-  // Cooldown timer
+  // Cooldown timers
   useEffect(() => {
     if (otpCooldown <= 0) return;
     const timer = setInterval(() => setOtpCooldown((c) => c - 1), 1000);
     return () => clearInterval(timer);
   }, [otpCooldown]);
 
-  // Reset OTP state when phone number changes
+  useEffect(() => {
+    if (emailOtpCooldown <= 0) return;
+    const timer = setInterval(() => setEmailOtpCooldown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [emailOtpCooldown]);
+
+  // Reset OTP state when phone/email changes
   useEffect(() => {
     setOtpSent(false);
     setOtpValue('');
     setPhoneVerified(false);
   }, [phoneNumber]);
 
+  useEffect(() => {
+    setEmailOtpSent(false);
+    setEmailOtpValue('');
+    setEmailVerified(false);
+  }, [email]);
+
   const handleSendOtp = async () => {
     if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
       setErrors((prev) => ({ ...prev, phone: 'Please enter a valid 10-digit mobile number' }));
       return;
     }
-    setErrors((prev) => {
-      const { phone, ...rest } = prev;
-      return rest;
-    });
+    setErrors((prev) => { const { phone, ...rest } = prev; return rest; });
     setOtpLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-otp', {
@@ -111,6 +132,64 @@ export default function AuthPage() {
     }
   };
 
+  const handleSendEmailOtp = async () => {
+    if (!z.string().email().safeParse(email).success) {
+      setErrors((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
+      return;
+    }
+    setErrors((prev) => { const { email, ...rest } = prev; return rest; });
+    setEmailOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email-otp', {
+        body: { email },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setEmailOtpSent(true);
+      setEmailOtpCooldown(30);
+      toast({ title: 'Email OTP Sent', description: 'A 6-digit code has been sent to your email.' });
+    } catch (err: any) {
+      toast({ title: 'Failed to send OTP', description: err.message || 'Please try again.', variant: 'destructive' });
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    if (emailOtpValue.length !== 6) return;
+    setEmailOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-email-otp', {
+        body: { email, otp: emailOtpValue },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setEmailVerified(true);
+      toast({ title: 'Email Verified!', description: 'Your email has been verified.' });
+    } catch (err: any) {
+      toast({ title: 'Verification Failed', description: err.message || 'Invalid or expired OTP.', variant: 'destructive' });
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!z.string().email().safeParse(forgotEmail).success) {
+      toast({ title: 'Invalid email', description: 'Please enter a valid email address.', variant: 'destructive' });
+      return;
+    }
+    setForgotLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Reset Link Sent!', description: 'Check your email for a password reset link.' });
+    }
+    setForgotLoading(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -143,9 +222,13 @@ export default function AuthPage() {
           navigate('/');
         }
       } else {
-        // Require phone verification for signup
         if (!phoneVerified) {
           toast({ title: 'Phone not verified', description: 'Please verify your mobile number before signing up.', variant: 'destructive' });
+          setIsLoading(false);
+          return;
+        }
+        if (!emailVerified) {
+          toast({ title: 'Email not verified', description: 'Please verify your email before signing up.', variant: 'destructive' });
           setIsLoading(false);
           return;
         }
@@ -169,7 +252,7 @@ export default function AuthPage() {
             toast({ title: 'Signup Failed', description: signUpError.message, variant: 'destructive' });
           }
         } else {
-          toast({ title: 'Check your email!', description: 'We sent a verification link to your email. Please verify to complete signup.' });
+          toast({ title: 'Account Created!', description: 'Your account has been created successfully. Please check your email to confirm.' });
         }
       }
     } catch {
@@ -178,6 +261,46 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  // Forgot password view
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <div className="h-16 w-16 rounded-2xl gradient-hero flex items-center justify-center">
+                <Smartphone className="h-8 w-8 text-primary-foreground" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold">Forgot Password</h2>
+            <p className="text-muted-foreground mt-2">Enter your email and we'll send you a reset link.</p>
+          </div>
+
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="forgotEmail">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="forgotEmail" type="email" placeholder="you@example.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} className="pl-10" disabled={forgotLoading} />
+              </div>
+            </div>
+
+            <Button className="w-full gap-2" disabled={forgotLoading} onClick={handleForgotPassword}>
+              {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+
+            <div className="text-center">
+              <button type="button" onClick={() => setShowForgotPassword(false)} className="text-primary font-medium hover:underline text-sm">
+                ← Back to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -213,7 +336,6 @@ export default function AuthPage() {
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
-          {/* Mobile logo */}
           <div className="lg:hidden flex justify-center mb-6">
             <div className="flex items-center gap-2">
               <div className="h-10 w-10 rounded-xl gradient-hero flex items-center justify-center">
@@ -264,16 +386,7 @@ export default function AuthPage() {
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="phoneNumber"
-                        type="tel"
-                        placeholder="9876543210"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                        className="pl-10"
-                        disabled={isLoading || phoneVerified}
-                        maxLength={10}
-                      />
+                      <Input id="phoneNumber" type="tel" placeholder="9876543210" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))} className="pl-10" disabled={isLoading || phoneVerified} maxLength={10} />
                     </div>
                     {phoneVerified ? (
                       <div className="flex items-center gap-1 text-sm font-medium text-green-600 px-3">
@@ -281,14 +394,7 @@ export default function AuthPage() {
                         Verified
                       </div>
                     ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="shrink-0 h-10"
-                        disabled={otpLoading || otpCooldown > 0 || phoneNumber.length !== 10}
-                        onClick={handleSendOtp}
-                      >
+                      <Button type="button" variant="outline" size="sm" className="shrink-0 h-10" disabled={otpLoading || otpCooldown > 0 || phoneNumber.length !== 10} onClick={handleSendOtp}>
                         {otpLoading ? 'Sending...' : otpCooldown > 0 ? `Resend (${otpCooldown}s)` : otpSent ? 'Resend OTP' : 'Send OTP'}
                       </Button>
                     )}
@@ -296,27 +402,16 @@ export default function AuthPage() {
                   {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                 </div>
 
-                {/* OTP Input */}
                 {otpSent && !phoneVerified && (
                   <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
                     <Label>Enter OTP sent to your phone</Label>
                     <div className="flex items-center gap-3">
                       <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
                         <InputOTPGroup>
-                          <InputOTPSlot index={0} />
-                          <InputOTPSlot index={1} />
-                          <InputOTPSlot index={2} />
-                          <InputOTPSlot index={3} />
-                          <InputOTPSlot index={4} />
-                          <InputOTPSlot index={5} />
+                          <InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} />
                         </InputOTPGroup>
                       </InputOTP>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={otpValue.length !== 6 || otpLoading}
-                        onClick={handleVerifyOtp}
-                      >
+                      <Button type="button" size="sm" disabled={otpValue.length !== 6 || otpLoading} onClick={handleVerifyOtp}>
                         {otpLoading ? 'Verifying...' : 'Verify'}
                       </Button>
                     </div>
@@ -327,15 +422,52 @@ export default function AuthPage() {
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" disabled={isLoading} />
+              <div className={!isLogin ? "flex gap-2" : ""}>
+                <div className={`relative ${!isLogin ? 'flex-1' : ''}`}>
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" disabled={isLoading || (!isLogin && emailVerified)} />
+                </div>
+                {!isLogin && (
+                  emailVerified ? (
+                    <div className="flex items-center gap-1 text-sm font-medium text-green-600 px-3">
+                      <CheckCircle className="h-4 w-4" />
+                      Verified
+                    </div>
+                  ) : (
+                    <Button type="button" variant="outline" size="sm" className="shrink-0 h-10" disabled={emailOtpLoading || emailOtpCooldown > 0 || !email} onClick={handleSendEmailOtp}>
+                      {emailOtpLoading ? 'Sending...' : emailOtpCooldown > 0 ? `Resend (${emailOtpCooldown}s)` : emailOtpSent ? 'Resend OTP' : 'Send OTP'}
+                    </Button>
+                  )
+                )}
               </div>
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
+            {!isLogin && emailOtpSent && !emailVerified && (
+              <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
+                <Label>Enter OTP sent to your email</Label>
+                <div className="flex items-center gap-3">
+                  <InputOTP maxLength={6} value={emailOtpValue} onChange={setEmailOtpValue}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                  <Button type="button" size="sm" disabled={emailOtpValue.length !== 6 || emailOtpLoading} onClick={handleVerifyEmailOtp}>
+                    {emailOtpLoading ? 'Verifying...' : 'Verify'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {isLogin && (
+                  <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" disabled={isLoading} />
@@ -346,7 +478,7 @@ export default function AuthPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={isLoading || (!isLogin && !phoneVerified)}>
+            <Button type="submit" className="w-full gap-2" disabled={isLoading || (!isLogin && (!phoneVerified || !emailVerified))}>
               {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -365,9 +497,7 @@ export default function AuthPage() {
               disabled={isLoading}
               onClick={async () => {
                 setIsLoading(true);
-                const { error } = await lovable.auth.signInWithOAuth('google', {
-                  redirect_uri: window.location.origin,
-                });
+                const { error } = await lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin });
                 if (error) {
                   toast({ title: 'Google Sign-In Failed', description: error.message || 'Something went wrong.', variant: 'destructive' });
                   setIsLoading(false);
