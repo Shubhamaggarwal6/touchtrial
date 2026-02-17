@@ -58,11 +58,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact Us</h4>
             <div className="flex flex-col gap-3">
-              <a href="mailto:hello@touchtrial.in" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="mailto:support@touchtrial.in" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Mail className="h-4 w-4" />
-                hello@touchtrial.in
+                support@touchtrial.in
               </a>
-              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="tel:+918950643103" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Phone className="h-4 w-4" />
                 +91 98765 43210
               </a>
