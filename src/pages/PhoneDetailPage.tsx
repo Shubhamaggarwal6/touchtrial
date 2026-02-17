@@ -40,7 +40,9 @@ const PhoneDetailPage = () => {
     if (inCart) {
       removeFromCart(phone.id);
     } else {
-      addToCart(phone);
+      const variantLabel = `${currentVariant.ram} / ${currentVariant.storage}`;
+      const colorLabel = phone.colors[selectedColor]?.name || '';
+      addToCart(phone, variantLabel, colorLabel);
     }
   };
 

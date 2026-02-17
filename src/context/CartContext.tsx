@@ -3,11 +3,13 @@ import { Phone } from '@/data/phones';
 
 interface CartItem {
   phone: Phone;
+  selectedVariant: string;
+  selectedColor: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (phone: Phone) => void;
+  addToCart: (phone: Phone, variant?: string, color?: string) => void;
   removeFromCart: (phoneId: string) => void;
   clearCart: () => void;
   isInCart: (phoneId: string) => boolean;
@@ -36,12 +38,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
 
-  const addToCart = useCallback((phone: Phone) => {
+  const addToCart = useCallback((phone: Phone, variant?: string, color?: string) => {
     setItems(prev => {
       if (prev.some(item => item.phone.id === phone.id)) {
-        return prev;
+        // Update variant/color if already in cart
+        return prev.map(item =>
+          item.phone.id === phone.id
+            ? { ...item, selectedVariant: variant || item.selectedVariant, selectedColor: color || item.selectedColor }
+            : item
+        );
       }
-      return [...prev, { phone }];
+      return [...prev, { phone, selectedVariant: variant || `${phone.variants[0]?.ram} / ${phone.variants[0]?.storage}`, selectedColor: color || phone.colors[0]?.name || '' }];
     });
   }, []);
 

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw } from 'lucide-react';
+import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw, Mail, Phone, MapPin } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +17,8 @@ interface Booking {
   id: string;
   phone_ids: string[];
   phone_names: string[];
+  phone_variants: string[];
+  phone_colors: string[];
   total_experience_fee: number;
   convenience_fee: number;
   total_amount: number;
@@ -173,6 +177,45 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* Profile Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              My Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row items-start gap-6">
+              <Avatar className="h-16 w-16">
+                <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                  {(profile?.full_name || user.email || '?').charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-3">
+                <div>
+                  <p className="text-lg font-semibold">{profile?.full_name || 'Not set'}</p>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{profile?.phone || 'Not added'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{profile?.address || 'Not added'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Bookings */}
         <Tabs defaultValue="active" className="space-y-6">
           <TabsList>
@@ -252,7 +295,11 @@ function BookingCard({
             <p className="text-sm text-muted-foreground mb-1">Phones</p>
             <div className="flex flex-wrap gap-2">
               {booking.phone_names.map((name, idx) => (
-                <Badge key={idx} variant="outline">{name}</Badge>
+                <Badge key={idx} variant="outline">
+                  {name}
+                  {booking.phone_variants?.[idx] && ` (${booking.phone_variants[idx]})`}
+                  {booking.phone_colors?.[idx] && ` — ${booking.phone_colors[idx]}`}
+                </Badge>
               ))}
             </div>
           </div>

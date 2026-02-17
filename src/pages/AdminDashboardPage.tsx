@@ -17,6 +17,8 @@ interface Booking {
   user_id: string;
   phone_ids: string[];
   phone_names: string[];
+  phone_variants: string[];
+  phone_colors: string[];
   total_experience_fee: number;
   convenience_fee: number;
   total_amount: number;
@@ -289,7 +291,15 @@ const AdminDashboardPage = () => {
                           <p className="text-sm font-medium mb-1">Phones</p>
                           <ul className="text-sm text-muted-foreground">
                             {booking.phone_names.map((name, i) => (
-                              <li key={i}>• {name}</li>
+                              <li key={i}>
+                                • {name}
+                                {booking.phone_variants?.[i] && (
+                                  <span className="ml-1 text-xs">({booking.phone_variants[i]})</span>
+                                )}
+                                {booking.phone_colors?.[i] && (
+                                  <span className="ml-1 text-xs italic">— {booking.phone_colors[i]}</span>
+                                )}
+                              </li>
                             ))}
                           </ul>
                         </div>

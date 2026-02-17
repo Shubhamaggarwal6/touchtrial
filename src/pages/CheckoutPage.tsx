@@ -118,11 +118,15 @@ const CheckoutPage = () => {
     try {
       const phoneIds = items.map(item => item.phone.id);
       const phoneNames = items.map(item => `${item.phone.brand} ${item.phone.model}`);
+      const phoneVariants = items.map(item => item.selectedVariant || '');
+      const phoneColors = items.map(item => item.selectedColor || '');
 
       const { error } = await supabase.from('bookings').insert({
         user_id: user.id,
         phone_ids: phoneIds,
         phone_names: phoneNames,
+        phone_variants: phoneVariants,
+        phone_colors: phoneColors,
         total_experience_fee: homeExperienceDeposit,
         convenience_fee: convenienceFee,
         total_amount: totalAmount,
@@ -285,7 +289,7 @@ const CheckoutPage = () => {
                   <CardTitle>Order Items</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {items.map(({ phone }) => (
+                  {items.map(({ phone, selectedVariant, selectedColor }) => (
                     <div key={phone.id} className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-lg bg-secondary overflow-hidden">
                         <img
@@ -296,7 +300,9 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{phone.brand} {phone.model}</p>
-                        <p className="text-sm text-muted-foreground">{phone.ram} • {phone.storage}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedVariant}{selectedColor ? ` • ${selectedColor}` : ''}
+                        </p>
                       </div>
                     </div>
                   ))}
