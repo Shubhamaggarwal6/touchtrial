@@ -125,6 +125,78 @@ export type Database = {
         }
         Relationships: []
       }
+      phones: {
+        Row: {
+          bank_offers: Json
+          battery: string
+          brand: string
+          camera: string
+          colors: Json
+          created_at: string
+          description: string
+          display: string
+          gallery: string[]
+          highlights: string[]
+          id: string
+          image: string
+          is_active: boolean
+          model: string
+          os: string
+          price: number
+          processor: string
+          ram: string
+          storage: string
+          updated_at: string
+          variants: Json
+        }
+        Insert: {
+          bank_offers?: Json
+          battery?: string
+          brand: string
+          camera?: string
+          colors?: Json
+          created_at?: string
+          description?: string
+          display?: string
+          gallery?: string[]
+          highlights?: string[]
+          id: string
+          image?: string
+          is_active?: boolean
+          model: string
+          os?: string
+          price: number
+          processor?: string
+          ram?: string
+          storage?: string
+          updated_at?: string
+          variants?: Json
+        }
+        Update: {
+          bank_offers?: Json
+          battery?: string
+          brand?: string
+          camera?: string
+          colors?: Json
+          created_at?: string
+          description?: string
+          display?: string
+          gallery?: string[]
+          highlights?: string[]
+          id?: string
+          image?: string
+          is_active?: boolean
+          model?: string
+          os?: string
+          price?: number
+          processor?: string
+          ram?: string
+          storage?: string
+          updated_at?: string
+          variants?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
