@@ -32,9 +32,9 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-hero">
-            <Smartphone className="h-5 w-5 text-primary-foreground" />
+        <Link to="/" className="flex shrink-0 items-center gap-2 font-bold text-lg">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl gradient-hero">
+            <Smartphone className="h-4 w-4 text-primary-foreground" />
           </div>
           <span>TouchTrial</span>
         </Link>
