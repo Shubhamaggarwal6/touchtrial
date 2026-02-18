@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { Link } from 'react-router-dom';
-import { phones as phoneCatalog } from '@/data/phones';
+import { usePhones } from '@/hooks/use-phones';
 
 interface PhoneRecommendation {
   phone_id: string;
@@ -66,6 +66,7 @@ export const PhoneAdvisorChat = () => {
   const { toast } = useToast();
   const { user, session } = useAuth();
   const { addToCart, isInCart } = useCart();
+  const { data: phoneCatalog = [] } = usePhones();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
