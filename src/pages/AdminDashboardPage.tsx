@@ -7,9 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw, Download } from 'lucide-react';
+import { Loader2, RefreshCw, Download, Smartphone } from 'lucide-react';
 import { BookingCard, type Booking } from '@/components/admin/BookingCard';
 import { UserHistoryDialog } from '@/components/admin/UserHistoryDialog';
+import { PhonesManagement } from '@/components/admin/PhonesManagement';
 import { format } from 'date-fns';
 
 const AdminDashboardPage = () => {
@@ -158,7 +159,7 @@ const AdminDashboardPage = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage all customer bookings</p>
+            <p className="text-muted-foreground">Manage bookings and phone catalogue</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={exportCSV}>
@@ -187,35 +188,53 @@ const AdminDashboardPage = () => {
           ))}
         </div>
 
-        {/* Bookings Tabs */}
-        <Tabs defaultValue="all">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All ({bookings.length})</TabsTrigger>
-            <TabsTrigger value="pending">Pending ({filterBookings('pending').length})</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed ({filterBookings('confirmed').length})</TabsTrigger>
-            <TabsTrigger value="delivered">Delivered ({filterBookings('delivered').length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({filterBookings('completed').length})</TabsTrigger>
+        {/* Main Tabs */}
+        <Tabs defaultValue="bookings">
+          <TabsList className="mb-6">
+            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="phones">
+              <Smartphone className="h-4 w-4 mr-2" />
+              Phones Catalogue
+            </TabsTrigger>
           </TabsList>
 
-          {['all', 'pending', 'confirmed', 'delivered', 'completed'].map(tab => (
-            <TabsContent key={tab} value={tab} className="space-y-4">
-              {filterBookings(tab).length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">No bookings found</CardContent>
-                </Card>
-              ) : (
-                filterBookings(tab).map(booking => (
-                  <BookingCard
-                    key={booking.id}
-                    booking={booking}
-                    updatingId={updatingId}
-                    onStatusChange={updateBookingStatus}
-                    onViewUserHistory={handleViewUserHistory}
-                  />
-                ))
-              )}
-            </TabsContent>
-          ))}
+          {/* Bookings Tab */}
+          <TabsContent value="bookings">
+            <Tabs defaultValue="all">
+              <TabsList className="mb-4">
+                <TabsTrigger value="all">All ({bookings.length})</TabsTrigger>
+                <TabsTrigger value="pending">Pending ({filterBookings('pending').length})</TabsTrigger>
+                <TabsTrigger value="confirmed">Confirmed ({filterBookings('confirmed').length})</TabsTrigger>
+                <TabsTrigger value="delivered">Delivered ({filterBookings('delivered').length})</TabsTrigger>
+                <TabsTrigger value="completed">Completed ({filterBookings('completed').length})</TabsTrigger>
+              </TabsList>
+
+              {['all', 'pending', 'confirmed', 'delivered', 'completed'].map(tab => (
+                <TabsContent key={tab} value={tab} className="space-y-4">
+                  {filterBookings(tab).length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center text-muted-foreground">No bookings found</CardContent>
+                    </Card>
+                  ) : (
+                    filterBookings(tab).map(booking => (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        updatingId={updatingId}
+                        onStatusChange={updateBookingStatus}
+                        onViewUserHistory={handleViewUserHistory}
+                      />
+                    ))
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
+          </TabsContent>
+
+          {/* Phones Catalogue Tab */}
+          <TabsContent value="phones">
+            <PhonesManagement />
+          </TabsContent>
         </Tabs>
 
         {/* User History Dialog */}

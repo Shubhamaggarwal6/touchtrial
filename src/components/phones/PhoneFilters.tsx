@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
-import { brands, operatingSystems } from '@/data/phones';
+import { operatingSystems } from '@/data/phones';
 
 interface FiltersState {
   brands: string[];
@@ -17,12 +17,13 @@ interface PhoneFiltersProps {
   filters: FiltersState;
   onChange: (filters: FiltersState) => void;
   onClear: () => void;
+  brands?: string[];
 }
 
 const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
 const storageOptions = ['128GB', '256GB', '512GB', '1TB'];
 
-export function PhoneFilters({ filters, onChange, onClear }: PhoneFiltersProps) {
+export function PhoneFilters({ filters, onChange, onClear, brands = [] }: PhoneFiltersProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
