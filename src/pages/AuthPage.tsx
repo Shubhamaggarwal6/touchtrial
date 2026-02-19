@@ -312,7 +312,7 @@ export default function AuthPage() {
               <Smartphone className="h-10 w-10 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-primary-foreground mb-4">PhoneHome</h1>
+          <h1 className="text-4xl font-bold text-primary-foreground mb-4">TouchTrial</h1>
           <p className="text-xl text-primary-foreground/80 mb-8">
             Try smartphones at home before you buy. No more guesswork, just confidence.
           </p>
@@ -341,7 +341,7 @@ export default function AuthPage() {
               <div className="h-10 w-10 rounded-xl gradient-hero flex items-center justify-center">
                 <Smartphone className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold">PhoneHome</span>
+              <span className="text-2xl font-bold">TouchTrial</span>
             </div>
           </div>
 
