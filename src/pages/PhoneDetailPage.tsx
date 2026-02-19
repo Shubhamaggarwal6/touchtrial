@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Check, ChevronRight, CreditCard, Tag } from 'lucide-react';
+import { ArrowLeft, Plus, Check, ChevronRight, CreditCard, Tag, ChevronLeft, X, ZoomIn } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhoneVariant } from '@/data/phones';
 import { useCart } from '@/context/CartContext';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { usePhones } from '@/hooks/use-phones';
 
 const PhoneDetailPage = () => {
@@ -17,6 +17,12 @@ const PhoneDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<number>(0);
   const [selectedColor, setSelectedColor] = useState<number>(0);
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [fullscreenIndex, setFullscreenIndex] = useState(0);
+
+  // Touch/swipe state
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const { data: phones = [], isLoading } = usePhones();
   const phone = phones.find(p => p.id === id);
@@ -27,6 +33,34 @@ const PhoneDetailPage = () => {
       const variantLabel = `${v.ram} / ${v.storage}`;
       const colorLabel = phone.colors[colorIdx]?.name || '';
       addToCart(phone, variantLabel, colorLabel);
+    }
+  };
+
+  const goToImage = useCallback((index: number, images: string[]) => {
+    const clamped = Math.max(0, Math.min(index, images.length - 1));
+    setSelectedImage(clamped);
+  }, []);
+
+  const goToFullscreen = useCallback((index: number, images: string[]) => {
+    const clamped = Math.max(0, Math.min(index, images.length - 1));
+    setFullscreenIndex(clamped);
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, images: string[], isFullscreen = false) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = (touchStartX.current ?? 0) - (touchEndX.current ?? 0);
+    if (Math.abs(diff) > 40) {
+      if (isFullscreen) {
+        const next = diff > 0 ? fullscreenIndex + 1 : fullscreenIndex - 1;
+        goToFullscreen(next, images);
+      } else {
+        const next = diff > 0 ? selectedImage + 1 : selectedImage - 1;
+        goToImage(next, images);
+      }
     }
   };
 
@@ -86,8 +120,79 @@ const PhoneDetailPage = () => {
     { label: 'Operating System', value: phone.os },
   ];
 
+  const images = phone.gallery;
+
   return (
     <Layout>
+      {/* Fullscreen Image Overlay */}
+      {fullscreenOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={() => setFullscreenOpen(false)}
+        >
+          {/* Close */}
+          <button
+            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            onClick={() => setFullscreenOpen(false)}
+          >
+            <X className="h-6 w-6" />
+          </button>
+
+          {/* Prev */}
+          {fullscreenIndex > 0 && (
+            <button
+              className="absolute left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={(e) => { e.stopPropagation(); goToFullscreen(fullscreenIndex - 1, images); }}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          )}
+
+          {/* Next */}
+          {fullscreenIndex < images.length - 1 && (
+            <button
+              className="absolute right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={(e) => { e.stopPropagation(); goToFullscreen(fullscreenIndex + 1, images); }}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          )}
+
+          {/* Image */}
+          <div
+            className="relative w-full h-full flex items-center justify-center px-16"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={(e) => handleTouchEnd(e, images, true)}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={images[fullscreenIndex]}
+              alt={`${phone.brand} ${phone.model} - ${fullscreenIndex + 1}`}
+              className="max-w-full max-h-full object-contain select-none"
+              draggable={false}
+            />
+          </div>
+
+          {/* Dots */}
+          {images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); goToFullscreen(i, images); }}
+                  className={`h-2 rounded-full transition-all ${i === fullscreenIndex ? 'w-6 bg-white' : 'w-2 bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Counter */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+            {fullscreenIndex + 1} / {images.length}
+          </div>
+        </div>
+      )}
+
       <div className="container py-8">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link to="/phones" className="hover:text-foreground transition-colors flex items-center gap-1">
@@ -100,15 +205,66 @@ const PhoneDetailPage = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Gallery */}
           <div className="space-y-4">
-            <div className="aspect-square bg-gradient-to-b from-secondary/50 to-secondary rounded-2xl overflow-hidden">
-              <img src={phone.gallery[selectedImage]} alt={`${phone.brand} ${phone.model}`} className="w-full h-full object-cover" />
+            {/* Main image with swipe */}
+            <div className="relative aspect-square bg-gradient-to-b from-secondary/50 to-secondary rounded-2xl overflow-hidden group">
+              <div
+                className="w-full h-full"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, images)}
+              >
+                <img
+                  src={images[selectedImage]}
+                  alt={`${phone.brand} ${phone.model}`}
+                  className="w-full h-full object-cover cursor-zoom-in"
+                  onClick={() => { setFullscreenIndex(selectedImage); setFullscreenOpen(true); }}
+                  draggable={false}
+                />
+              </div>
+
+              {/* Zoom hint */}
+              <div className="absolute top-3 right-3 p-2 rounded-full bg-black/30 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <ZoomIn className="h-4 w-4" />
+              </div>
+
+              {/* Prev / Next arrows */}
+              {selectedImage > 0 && (
+                <button
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={() => goToImage(selectedImage - 1, images)}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              )}
+              {selectedImage < images.length - 1 && (
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={() => goToImage(selectedImage + 1, images)}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              )}
+
+              {/* Dot indicators */}
+              {images.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToImage(i, images)}
+                      className={`h-1.5 rounded-full transition-all ${i === selectedImage ? 'w-5 bg-white' : 'w-1.5 bg-white/50'}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex gap-3">
-              {phone.gallery.map((image, index) => (
+
+            {/* Thumbnails */}
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-border'}`}
+                  className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-border'}`}
                 >
                   <img src={image} alt={`${phone.brand} ${phone.model} view ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
