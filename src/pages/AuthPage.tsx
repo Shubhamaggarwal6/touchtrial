@@ -323,7 +323,7 @@ export default function AuthPage() {
             </div>
             <div className="flex items-center gap-3 text-primary-foreground/90">
               <div className="h-8 w-8 rounded-full bg-background/20 flex items-center justify-center text-sm font-bold">2</div>
-              <span>Try them at home for 3 days</span>
+              <span>Use at home for 3 days</span>
             </div>
             <div className="flex items-center gap-3 text-primary-foreground/90">
               <div className="h-8 w-8 rounded-full bg-background/20 flex items-center justify-center text-sm font-bold">3</div>
