@@ -11,7 +11,7 @@ function isValidEmail(email: string): boolean {
 
 async function sendEmailViaSMTP(to: string, otpCode: string): Promise<void> {
   const smtpHost = Deno.env.get('SMTP_HOST') || 'smtp.gmail.com'
-  const smtpPort = Deno.env.get('SMTP_PORT') || '587'
+  const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
   const smtpUser = Deno.env.get('SMTP_USER')
   const smtpPass = Deno.env.get('SMTP_PASS')
   const fromEmail = Deno.env.get('SMTP_FROM') || smtpUser
@@ -20,102 +20,84 @@ async function sendEmailViaSMTP(to: string, otpCode: string): Promise<void> {
     throw new Error('SMTP credentials not configured')
   }
 
-  // Use Resend-style HTTP API or direct SMTP via fetch
-  // For Deno edge functions, we use a simple HTTP-based email approach
-  // Using smtp.js or a lightweight approach
-  
   const emailBody = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #333;">PhoneHome</h2>
+        <h2 style="color: #333; font-size: 24px; margin: 0;">TouchTrial</h2>
       </div>
       <div style="background: #f9f9f9; border-radius: 8px; padding: 30px; text-align: center;">
         <h3 style="color: #333; margin-bottom: 10px;">Email Verification</h3>
         <p style="color: #666; margin-bottom: 20px;">Your one-time verification code is:</p>
-        <div style="background: #fff; border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-          <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #333;">${otpCode}</span>
+        <div style="background: #fff; border: 2px dashed #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+          <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #333;">${otpCode}</span>
         </div>
         <p style="color: #999; font-size: 13px;">This code expires in 5 minutes. Do not share it with anyone.</p>
       </div>
+      <p style="text-align: center; color: #bbb; font-size: 12px; margin-top: 20px;">TouchTrial &mdash; Experience before you buy</p>
     </div>
   `
 
-  // Build the SMTP connection using Deno's built-in TCP
-  const conn = await Deno.connect({ hostname: smtpHost, port: parseInt(smtpPort) })
-  
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
 
-  async function readResponse(): Promise<string> {
-    const buf = new Uint8Array(1024)
-    const n = await conn.read(buf)
-    return decoder.decode(buf.subarray(0, n || 0))
+  // Connect plain first
+  const conn = await Deno.connect({ hostname: smtpHost, port: smtpPort })
+
+  async function readLine(reader: Deno.Conn | Deno.TlsConn): Promise<string> {
+    const buf = new Uint8Array(4096)
+    const n = await reader.read(buf)
+    return decoder.decode(buf.subarray(0, n ?? 0))
   }
 
-  async function sendCommand(cmd: string): Promise<string> {
-    await conn.write(encoder.encode(cmd + '\r\n'))
-    return await readResponse()
+  async function sendCmd(reader: Deno.Conn | Deno.TlsConn, cmd: string): Promise<string> {
+    await reader.write(encoder.encode(cmd + '\r\n'))
+    return await readLine(reader)
   }
 
   try {
-    await readResponse() // greeting
-    
-    let response = await sendCommand(`EHLO localhost`)
-    
-    // Start TLS if port 587
-    if (smtpPort === '587') {
-      await sendCommand('STARTTLS')
-      const tlsConn = await Deno.startTls(conn, { hostname: smtpHost })
-      
-      // Re-assign for TLS
-      const tlsEncoder = new TextEncoder()
-      const tlsDecoder = new TextDecoder()
-      
-      async function tlsRead(): Promise<string> {
-        const buf = new Uint8Array(1024)
-        const n = await tlsConn.read(buf)
-        return tlsDecoder.decode(buf.subarray(0, n || 0))
-      }
-      
-      async function tlsSend(cmd: string): Promise<string> {
-        await tlsConn.write(tlsEncoder.encode(cmd + '\r\n'))
-        return await tlsRead()
-      }
+    await readLine(conn) // greeting
 
-      await tlsSend('EHLO localhost')
-      
-      // AUTH LOGIN
-      await tlsSend('AUTH LOGIN')
-      await tlsSend(btoa(smtpUser))
-      response = await tlsSend(btoa(smtpPass))
-      
-      if (!response.includes('235')) {
-        tlsConn.close()
-        throw new Error('SMTP authentication failed')
-      }
-      
-      await tlsSend(`MAIL FROM:<${fromEmail}>`)
-      await tlsSend(`RCPT TO:<${to}>`)
-      await tlsSend('DATA')
-      
-      const message = [
-        `From: PhoneHome <${fromEmail}>`,
-        `To: ${to}`,
-        `Subject: Your PhoneHome Verification Code: ${otpCode}`,
-        `MIME-Version: 1.0`,
-        `Content-Type: text/html; charset=utf-8`,
-        ``,
-        emailBody,
-        `.`
-      ].join('\r\n')
-      
-      await tlsSend(message)
-      await tlsSend('QUIT')
+    await sendCmd(conn, 'EHLO localhost')
+
+    // STARTTLS upgrade
+    await sendCmd(conn, 'STARTTLS')
+
+    const tlsConn = await Deno.startTls(conn, { hostname: smtpHost })
+
+    // Re-handshake after TLS
+    await sendCmd(tlsConn, 'EHLO localhost')
+
+    // AUTH LOGIN
+    await sendCmd(tlsConn, 'AUTH LOGIN')
+    await sendCmd(tlsConn, btoa(smtpUser))
+    const authResp = await sendCmd(tlsConn, btoa(smtpPass))
+
+    if (!authResp.startsWith('235')) {
       tlsConn.close()
+      throw new Error(`SMTP authentication failed: ${authResp.trim()}`)
     }
-  } catch (smtpError) {
-    conn.close()
-    throw smtpError
+
+    await sendCmd(tlsConn, `MAIL FROM:<${fromEmail}>`)
+    await sendCmd(tlsConn, `RCPT TO:<${to}>`)
+    await sendCmd(tlsConn, 'DATA')
+
+    const message = [
+      `From: TouchTrial <${fromEmail}>`,
+      `To: ${to}`,
+      `Subject: Your TouchTrial Verification Code: ${otpCode}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: text/html; charset=utf-8`,
+      ``,
+      emailBody,
+      `.`,
+    ].join('\r\n')
+
+    await sendCmd(tlsConn, message)
+    await sendCmd(tlsConn, 'QUIT')
+    tlsConn.close()
+  } catch (err) {
+    try { conn.close() } catch { /* ignore */ }
+    throw err
   }
 }
 
@@ -191,14 +173,7 @@ Deno.serve(async (req) => {
     }
 
     // Send email via SMTP
-    try {
-      await sendEmailViaSMTP(cleanEmail, otpCode)
-    } catch (emailError) {
-      console.error('Email sending failed:', emailError)
-      // Still return success - OTP is stored, just couldn't send email
-      // In development, check logs for the OTP
-      console.log(`Email OTP for ${cleanEmail}: ${otpCode}`)
-    }
+    await sendEmailViaSMTP(cleanEmail, otpCode)
 
     return new Response(
       JSON.stringify({ success: true, message: 'OTP sent to your email' }),
@@ -207,7 +182,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error('Error:', err)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Failed to send email. Please check your credentials.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
