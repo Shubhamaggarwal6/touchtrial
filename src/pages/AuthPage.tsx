@@ -36,13 +36,6 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Phone OTP state
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpValue, setOtpValue] = useState('');
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpCooldown, setOtpCooldown] = useState(0);
-
   // Email OTP state
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpValue, setEmailOtpValue] = useState('');
@@ -65,25 +58,11 @@ export default function AuthPage() {
     }
   }, [user, navigate]);
 
-  // Cooldown timers
-  useEffect(() => {
-    if (otpCooldown <= 0) return;
-    const timer = setInterval(() => setOtpCooldown((c) => c - 1), 1000);
-    return () => clearInterval(timer);
-  }, [otpCooldown]);
-
   useEffect(() => {
     if (emailOtpCooldown <= 0) return;
     const timer = setInterval(() => setEmailOtpCooldown((c) => c - 1), 1000);
     return () => clearInterval(timer);
   }, [emailOtpCooldown]);
-
-  // Reset OTP state when phone/email changes
-  useEffect(() => {
-    setOtpSent(false);
-    setOtpValue('');
-    setPhoneVerified(false);
-  }, [phoneNumber]);
 
   useEffect(() => {
     setEmailOtpSent(false);
@@ -91,53 +70,12 @@ export default function AuthPage() {
     setEmailVerified(false);
   }, [email]);
 
-  const handleSendOtp = async () => {
-    if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
-      setErrors((prev) => ({ ...prev, phone: 'Please enter a valid 10-digit mobile number' }));
-      return;
-    }
-    setErrors((prev) => { const { phone, ...rest } = prev; return rest; });
-    setOtpLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: { phone: phoneNumber },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setOtpSent(true);
-      setOtpCooldown(30);
-      toast({ title: 'OTP Sent', description: 'A 6-digit code has been sent to your phone.' });
-    } catch (err: any) {
-      toast({ title: 'Failed to send OTP', description: err.message || 'Please try again.', variant: 'destructive' });
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (otpValue.length !== 6) return;
-    setOtpLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-otp', {
-        body: { phone: phoneNumber, otp: otpValue },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setPhoneVerified(true);
-      toast({ title: 'Phone Verified!', description: 'Your mobile number has been verified.' });
-    } catch (err: any) {
-      toast({ title: 'Verification Failed', description: err.message || 'Invalid or expired OTP.', variant: 'destructive' });
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
   const handleSendEmailOtp = async () => {
     if (!z.string().email().safeParse(email).success) {
       setErrors((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
       return;
     }
-    setErrors((prev) => { const { email, ...rest } = prev; return rest; });
+    setErrors((prev) => { const { email: _e, ...rest } = prev; return rest; });
     setEmailOtpLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-email-otp', {
@@ -147,7 +85,7 @@ export default function AuthPage() {
       if (data?.error) throw new Error(data.error);
       setEmailOtpSent(true);
       setEmailOtpCooldown(30);
-      toast({ title: 'Email OTP Sent', description: 'A 6-digit code has been sent to your email.' });
+      toast({ title: 'OTP Sent', description: 'A 6-digit code has been sent to your email.' });
     } catch (err: any) {
       toast({ title: 'Failed to send OTP', description: err.message || 'Please try again.', variant: 'destructive' });
     } finally {
@@ -222,11 +160,6 @@ export default function AuthPage() {
           navigate('/');
         }
       } else {
-        if (!phoneVerified) {
-          toast({ title: 'Phone not verified', description: 'Please verify your mobile number before signing up.', variant: 'destructive' });
-          setIsLoading(false);
-          return;
-        }
         if (!emailVerified) {
           toast({ title: 'Email not verified', description: 'Please verify your email before signing up.', variant: 'destructive' });
           setIsLoading(false);
@@ -252,7 +185,8 @@ export default function AuthPage() {
             toast({ title: 'Signup Failed', description: signUpError.message, variant: 'destructive' });
           }
         } else {
-          toast({ title: 'Account Created!', description: 'Your account has been created successfully. Please check your email to confirm.' });
+          toast({ title: 'Account Created!', description: 'Your account has been created successfully.' });
+          navigate('/');
         }
       }
     } catch {
@@ -359,6 +293,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
               <>
+                {/* Full Name */}
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
                   <div className="relative">
@@ -368,6 +303,7 @@ export default function AuthPage() {
                   {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                 </div>
 
+                {/* Gender */}
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <Select value={gender} onValueChange={setGender} disabled={isLoading}>
@@ -381,51 +317,42 @@ export default function AuthPage() {
                   {errors.gender && <p className="text-sm text-destructive">{errors.gender}</p>}
                 </div>
 
+                {/* Phone Number (contact only, no OTP) */}
                 <div className="space-y-2">
                   <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="phoneNumber" type="tel" placeholder="9876543210" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))} className="pl-10" disabled={isLoading || phoneVerified} maxLength={10} />
-                    </div>
-                    {phoneVerified ? (
-                      <div className="flex items-center gap-1 text-sm font-medium text-green-600 px-3">
-                        <CheckCircle className="h-4 w-4" />
-                        Verified
-                      </div>
-                    ) : (
-                      <Button type="button" variant="outline" size="sm" className="shrink-0 h-10" disabled={otpLoading || otpCooldown > 0 || phoneNumber.length !== 10} onClick={handleSendOtp}>
-                        {otpLoading ? 'Sending...' : otpCooldown > 0 ? `Resend (${otpCooldown}s)` : otpSent ? 'Resend OTP' : 'Send OTP'}
-                      </Button>
-                    )}
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      placeholder="9876543210"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className="pl-10"
+                      disabled={isLoading}
+                      maxLength={10}
+                    />
                   </div>
                   {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                 </div>
-
-                {otpSent && !phoneVerified && (
-                  <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
-                    <Label>Enter OTP sent to your phone</Label>
-                    <div className="flex items-center gap-3">
-                      <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
-                        <InputOTPGroup>
-                          <InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} />
-                        </InputOTPGroup>
-                      </InputOTP>
-                      <Button type="button" size="sm" disabled={otpValue.length !== 6 || otpLoading} onClick={handleVerifyOtp}>
-                        {otpLoading ? 'Verifying...' : 'Verify'}
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </>
             )}
 
+            {/* Email with OTP verification on signup */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className={!isLogin ? "flex gap-2" : ""}>
                 <div className={`relative ${!isLogin ? 'flex-1' : ''}`}>
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" disabled={isLoading || (!isLogin && emailVerified)} />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    disabled={isLoading || (!isLogin && emailVerified)}
+                  />
                 </div>
                 {!isLogin && (
                   emailVerified ? (
@@ -434,7 +361,14 @@ export default function AuthPage() {
                       Verified
                     </div>
                   ) : (
-                    <Button type="button" variant="outline" size="sm" className="shrink-0 h-10" disabled={emailOtpLoading || emailOtpCooldown > 0 || !email} onClick={handleSendEmailOtp}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 h-10"
+                      disabled={emailOtpLoading || emailOtpCooldown > 0 || !email}
+                      onClick={handleSendEmailOtp}
+                    >
                       {emailOtpLoading ? 'Sending...' : emailOtpCooldown > 0 ? `Resend (${emailOtpCooldown}s)` : emailOtpSent ? 'Resend OTP' : 'Send OTP'}
                     </Button>
                   )
@@ -443,9 +377,10 @@ export default function AuthPage() {
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
+            {/* Email OTP input */}
             {!isLogin && emailOtpSent && !emailVerified && (
               <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
-                <Label>Enter OTP sent to your email</Label>
+                <Label>Enter the 6-digit code sent to your email</Label>
                 <div className="flex items-center gap-3">
                   <InputOTP maxLength={6} value={emailOtpValue} onChange={setEmailOtpValue}>
                     <InputOTPGroup>
@@ -459,6 +394,7 @@ export default function AuthPage() {
               </div>
             )}
 
+            {/* Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -470,7 +406,15 @@ export default function AuthPage() {
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" disabled={isLoading} />
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10"
+                  disabled={isLoading}
+                />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -478,7 +422,11 @@ export default function AuthPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={isLoading || (!isLogin && (!phoneVerified || !emailVerified))}>
+            <Button
+              type="submit"
+              className="w-full gap-2"
+              disabled={isLoading || (!isLogin && !emailVerified)}
+            >
               {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
               <ArrowRight className="h-4 w-4" />
             </Button>
