@@ -81,13 +81,22 @@ export default function AuthPage() {
       const { data, error } = await supabase.functions.invoke('send-email-otp', {
         body: { email },
       });
-      if (error) throw error;
+      if (error) throw new Error('Something went wrong. Please try again.');
       if (data?.error) throw new Error(data.error);
       setEmailOtpSent(true);
       setEmailOtpCooldown(30);
-      toast({ title: 'OTP Sent', description: 'A 6-digit code has been sent to your email.' });
+      toast({ title: '✅ Code Sent!', description: `We sent a 6-digit code to ${email}. Check your inbox.` });
     } catch (err: any) {
-      toast({ title: 'Failed to send OTP', description: err.message || 'Please try again.', variant: 'destructive' });
+      const msg = err.message || '';
+      let friendly = 'We could not send the code. Please try again.';
+      if (msg.includes('already registered')) {
+        friendly = 'This email is already registered. Please sign in instead.';
+      } else if (msg.includes('Too many')) {
+        friendly = 'You have requested too many codes. Please wait an hour and try again.';
+      } else if (msg.includes('Invalid email')) {
+        friendly = 'Please enter a valid email address.';
+      }
+      toast({ title: 'Could not send code', description: friendly, variant: 'destructive' });
     } finally {
       setEmailOtpLoading(false);
     }
@@ -100,12 +109,17 @@ export default function AuthPage() {
       const { data, error } = await supabase.functions.invoke('verify-email-otp', {
         body: { email, otp: emailOtpValue },
       });
-      if (error) throw error;
+      if (error) throw new Error('Something went wrong. Please try again.');
       if (data?.error) throw new Error(data.error);
       setEmailVerified(true);
-      toast({ title: 'Email Verified!', description: 'Your email has been verified.' });
+      toast({ title: '✅ Email Verified!', description: 'Your email has been confirmed successfully.' });
     } catch (err: any) {
-      toast({ title: 'Verification Failed', description: err.message || 'Invalid or expired OTP.', variant: 'destructive' });
+      const msg = err.message || '';
+      let friendly = 'The code is wrong or has expired. Please request a new one.';
+      if (msg.includes('Too many')) {
+        friendly = 'Too many attempts. Please wait a while and try again.';
+      }
+      toast({ title: 'Incorrect code', description: friendly, variant: 'destructive' });
     } finally {
       setEmailOtpLoading(false);
     }
@@ -149,14 +163,12 @@ export default function AuthPage() {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: 'Login Failed',
-            description: error.message === 'Invalid login credentials' 
-              ? 'Invalid email or password. Please try again.' 
-              : error.message,
+            title: 'Could not sign in',
+            description: 'Your email or password is incorrect. Please try again.',
             variant: 'destructive',
           });
         } else {
-          toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
+          toast({ title: 'Welcome back! 👋', description: 'You are now signed in.' });
           navigate('/');
         }
       } else {
@@ -180,17 +192,17 @@ export default function AuthPage() {
         const { error: signUpError } = await signUp(email, password, fullName, phoneNumber, gender);
         if (signUpError) {
           if (signUpError.message.includes('already registered')) {
-            toast({ title: 'Account Exists', description: 'This email is already registered. Please login instead.', variant: 'destructive' });
+            toast({ title: 'Email already in use', description: 'An account with this email already exists. Please sign in instead.', variant: 'destructive' });
           } else {
-            toast({ title: 'Signup Failed', description: signUpError.message, variant: 'destructive' });
+            toast({ title: 'Could not create account', description: 'Something went wrong. Please try again in a moment.', variant: 'destructive' });
           }
         } else {
-          toast({ title: 'Account Created!', description: 'Your account has been created successfully.' });
+          toast({ title: '🎉 Account Created!', description: 'Welcome to TouchTrial! You are now signed in.' });
           navigate('/');
         }
       }
     } catch {
-      toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: 'Please check your connection and try again.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

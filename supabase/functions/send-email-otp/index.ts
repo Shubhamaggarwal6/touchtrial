@@ -85,6 +85,20 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
+    // Check if email is already registered
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('email', cleanEmail)
+      .maybeSingle()
+
+    if (existingProfile) {
+      return new Response(
+        JSON.stringify({ error: 'This email is already registered. Please sign in instead.' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Rate limiting: max 3 OTP sends per email per hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const { count } = await supabase
