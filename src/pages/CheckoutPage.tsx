@@ -168,6 +168,11 @@ const CheckoutPage = () => {
 
       if (error) throw error;
 
+      // Increment coupon usage if one was applied
+      if (couponCode) {
+        await supabase.rpc('increment_coupon_usage' as any, { coupon_code: couponCode });
+      }
+
       clearCart();
       navigate('/booking-success');
     } catch (error) {

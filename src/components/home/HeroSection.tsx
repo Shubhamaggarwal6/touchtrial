@@ -39,7 +39,7 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            Skip the crowded stores. Our specialist brings up to 5 phones to your home for a personalized demo—just ₹299 (₹199 deposit + ₹100 convenience). Deposit refunded on purchase. Pay for the phone at delivery!
+            Skip the crowded stores. Our specialist brings up to 5 phones to your home for a personalized hands-on demo. Deposit refunded on purchase. Pay for the phone at delivery!
           </p>
 
           {/* Search Bar */}

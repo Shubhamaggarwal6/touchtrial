@@ -10,7 +10,7 @@ const steps = [
   {
     icon: Package,
     title: 'Specialist Demo',
-    description: 'Pay ₹299 (₹199 deposit + ₹100 convenience). Our specialist brings up to 5 phones and gives you a personalized hands-on demo at your home.',
+    description: 'Book a home experience. Our specialist brings up to 5 phones and gives you a personalized hands-on demo at your home.',
     color: 'bg-accent/10 text-accent',
   },
   {

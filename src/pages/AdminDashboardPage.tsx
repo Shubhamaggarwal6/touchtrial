@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw, Download, Smartphone } from 'lucide-react';
+import { Loader2, RefreshCw, Download, Smartphone, Tag } from 'lucide-react';
 import { BookingCard, type Booking } from '@/components/admin/BookingCard';
 import { UserHistoryDialog } from '@/components/admin/UserHistoryDialog';
 import { PhonesManagement } from '@/components/admin/PhonesManagement';
+import { CouponsManagement } from '@/components/admin/CouponsManagement';
 import { format } from 'date-fns';
 
 const AdminDashboardPage = () => {
@@ -196,6 +197,10 @@ const AdminDashboardPage = () => {
               <Smartphone className="h-4 w-4 mr-2" />
               Phones Catalogue
             </TabsTrigger>
+            <TabsTrigger value="coupons">
+              <Tag className="h-4 w-4 mr-2" />
+              Coupons
+            </TabsTrigger>
           </TabsList>
 
           {/* Bookings Tab */}
@@ -234,6 +239,11 @@ const AdminDashboardPage = () => {
           {/* Phones Catalogue Tab */}
           <TabsContent value="phones">
             <PhonesManagement />
+          </TabsContent>
+
+          {/* Coupons Tab */}
+          <TabsContent value="coupons">
+            <CouponsManagement />
           </TabsContent>
         </Tabs>
 

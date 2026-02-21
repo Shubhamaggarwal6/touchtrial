@@ -71,6 +71,42 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          discount_amount: number
+          first_order_only: boolean
+          id: string
+          is_active: boolean
+          max_uses: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          discount_amount?: number
+          first_order_only?: boolean
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          discount_amount?: number
+          first_order_only?: boolean
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_otp_verifications: {
         Row: {
           created_at: string
