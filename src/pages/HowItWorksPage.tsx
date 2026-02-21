@@ -20,12 +20,12 @@ const steps = [
     icon: Package,
     number: 2,
     title: 'Specialist Visits Your Home',
-    description: 'Pay just ₹299 (₹199 refundable deposit + ₹100 convenience) for up to 5 phones. Our specialist brings the phones and gives you a personalized hands-on demo at your doorstep.',
+    description: 'Book a home experience for up to 5 phones. Our specialist brings the phones and gives you a personalized hands-on demo at your doorstep.',
     details: [
-      '₹199 refundable deposit',
-      '₹100 convenience fee',
+      'Refundable deposit on purchase',
       'Expert demo at your doorstep',
-      'Scheduled within 24-48 hours'
+      'Scheduled within 24-48 hours',
+      'Use coupon FIRST200 for ₹200 off your first order'
     ]
   },
   {
@@ -117,11 +117,11 @@ const HowItWorksPage = () => {
             
             <div className="grid sm:grid-cols-2 gap-6">
               <div className="bg-card rounded-xl p-4 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">3 Phones Experience</p>
+                <p className="text-sm text-muted-foreground mb-2">Up to 5 Phones</p>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>Home Experience Deposit</span>
-                    <span>₹199</span>
+                    <span>₹399</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Convenience Fee</span>
@@ -129,7 +129,7 @@ const HowItWorksPage = () => {
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹299</span>
+                    <span>₹499</span>
                   </div>
                 </div>
               </div>
@@ -139,7 +139,7 @@ const HowItWorksPage = () => {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>Home Experience Deposit</span>
-                    <span>₹199</span>
+                    <span>₹399</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Convenience Fee</span>
@@ -151,7 +151,7 @@ const HowItWorksPage = () => {
                   </div>
                   <div className="flex justify-between font-bold text-primary pt-2 border-t">
                     <span>Total</span>
-                    <span>₹437</span>
+                    <span>₹637</span>
                   </div>
                 </div>
               </div>

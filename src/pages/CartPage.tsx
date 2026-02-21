@@ -37,7 +37,7 @@ const CartPage = () => {
     }).format(price);
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponInput.trim()) {
       toast({
         title: 'Enter a coupon code',
@@ -47,7 +47,7 @@ const CartPage = () => {
       return;
     }
     
-    const success = applyCoupon(couponInput.trim());
+    const success = await applyCoupon(couponInput.trim());
     if (success) {
       toast({
         title: 'Coupon applied!',
@@ -57,7 +57,7 @@ const CartPage = () => {
     } else {
       toast({
         title: 'Invalid coupon',
-        description: 'This coupon code is not valid',
+        description: 'This coupon is not valid, has expired, or you are not eligible',
         variant: 'destructive',
       });
     }

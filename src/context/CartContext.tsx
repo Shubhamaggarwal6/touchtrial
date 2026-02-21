@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Phone } from '@/data/phones';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CartItem {
   phone: Phone;
@@ -20,13 +21,13 @@ interface CartContextType {
   extraPhoneCharge: number;
   couponCode: string;
   couponDiscount: number;
-  applyCoupon: (code: string) => boolean;
+  applyCoupon: (code: string) => Promise<boolean>;
   removeCoupon: () => void;
   homeExperienceDeposit: number;
   convenienceFee: number;
 }
 
-const HOME_EXPERIENCE_DEPOSIT = 199;
+const HOME_EXPERIENCE_DEPOSIT = 399;
 const CONVENIENCE_FEE = 100;
 const BASE_PHONE_LIMIT = 5;
 const EXTRA_PHONE_CHARGE = 69;
@@ -66,19 +67,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return items.some(item => item.phone.id === phoneId);
   }, [items]);
 
-  const applyCoupon = useCallback((code: string) => {
-    // Simple coupon validation - can be expanded
+  const applyCoupon = useCallback(async (code: string): Promise<boolean> => {
     const upperCode = code.toUpperCase();
-    if (upperCode === 'TRIAL50') {
+    try {
+      const { data: coupon, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', upperCode)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error || !coupon) return false;
+      if (coupon.current_uses >= coupon.max_uses) return false;
+
+      // If first_order_only, check if user has previous bookings
+      if (coupon.first_order_only) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { count } = await supabase
+            .from('bookings')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+          if (count && count > 0) return false;
+        }
+      }
+
       setCouponCode(upperCode);
-      setCouponDiscount(50);
+      setCouponDiscount(coupon.discount_amount);
       return true;
-    } else if (upperCode === 'FIRST100') {
-      setCouponCode(upperCode);
-      setCouponDiscount(100);
-      return true;
+    } catch {
+      return false;
     }
-    return false;
   }, []);
 
   const removeCoupon = useCallback(() => {
