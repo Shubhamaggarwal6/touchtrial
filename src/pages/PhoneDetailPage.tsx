@@ -193,7 +193,7 @@ const PhoneDetailPage = () => {
         </div>
       )}
 
-      <div className="container py-8 overflow-x-hidden">
+      <div className="container py-8 max-w-full overflow-hidden box-border">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link to="/phones" className="hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />All Phones
@@ -202,9 +202,9 @@ const PhoneDetailPage = () => {
           <span className="text-foreground">{phone.brand} {phone.model}</span>
         </nav>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 min-w-0">
           {/* Gallery */}
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             {/* Main image with swipe */}
             <div className="relative aspect-square bg-gradient-to-b from-secondary/50 to-secondary rounded-2xl overflow-hidden group">
               <div
@@ -273,7 +273,7 @@ const PhoneDetailPage = () => {
           </div>
 
           {/* Details */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0 max-w-full overflow-hidden break-words">
             <div>
               <Badge variant="secondary" className="mb-3">{phone.brand}</Badge>
               <h1 className="text-2xl md:text-4xl font-bold mb-4">{phone.model}</h1>
