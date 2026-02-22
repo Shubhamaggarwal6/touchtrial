@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw, Download, Smartphone, Tag } from 'lucide-react';
+import { Loader2, RefreshCw, Download, Smartphone, Tag, ArrowUpDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BookingCard, type Booking } from '@/components/admin/BookingCard';
 import { UserHistoryDialog } from '@/components/admin/UserHistoryDialog';
 import { PhonesManagement } from '@/components/admin/PhonesManagement';
@@ -24,6 +25,7 @@ const AdminDashboardPage = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyUserId, setHistoryUserId] = useState<string | null>(null);
   const [historyUserName, setHistoryUserName] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -108,8 +110,12 @@ const AdminDashboardPage = () => {
   };
 
   const filterBookings = (status: string) => {
-    if (status === 'all') return bookings;
-    return bookings.filter(b => b.status === status);
+    const filtered = status === 'all' ? bookings : bookings.filter(b => b.status === status);
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
   };
 
   const exportCSV = () => {
@@ -205,8 +211,22 @@ const AdminDashboardPage = () => {
 
           {/* Bookings Tab */}
           <TabsContent value="bookings">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as 'newest' | 'oldest')}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <Tabs defaultValue="all">
-              <TabsList className="mb-4">
+              <TabsList className="mb-4 flex-wrap">
                 <TabsTrigger value="all">All ({bookings.length})</TabsTrigger>
                 <TabsTrigger value="pending">Pending ({filterBookings('pending').length})</TabsTrigger>
                 <TabsTrigger value="confirmed">Confirmed ({filterBookings('confirmed').length})</TabsTrigger>
