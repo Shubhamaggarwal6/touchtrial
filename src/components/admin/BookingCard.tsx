@@ -59,113 +59,107 @@ export const BookingCard = ({ booking, updatingId, onStatusChange, onViewUserHis
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">{booking.user_name}</CardTitle>
-              {onViewUserHistory && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-primary"
-                  onClick={() => onViewUserHistory(booking.user_id, booking.user_name || 'User')}
-                >
-                  <User className="w-3 h-3 mr-1" />
-                  View History
-                </Button>
-              )}
+      <CardHeader className="pb-2 px-3 md:px-6">
+        <div className="flex flex-col gap-2">
+          {/* User info row */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1 flex-wrap">
+                <CardTitle className="text-base md:text-lg truncate">{booking.user_name}</CardTitle>
+                {onViewUserHistory && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-primary h-6 px-1.5"
+                    onClick={() => onViewUserHistory(booking.user_id, booking.user_name || 'User')}
+                  >
+                    <User className="w-3 h-3 mr-0.5" />
+                    History
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs md:text-sm text-muted-foreground truncate">{booking.user_email}</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Phone className="w-3 h-3 text-primary shrink-0" />
+                <span className="text-xs md:text-sm font-medium">{booking.user_phone || 'N/A'}</span>
+              </div>
+              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
+                #{booking.id.slice(0, 8)} • {format(new Date(booking.created_at), 'PPp')}
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {booking.user_email}
-            </p>
-            {/* Prominent phone number */}
-            <div className="flex items-center gap-1 mt-1">
-              <Phone className="w-3.5 h-3.5 text-primary" />
-              <span className="text-sm font-medium">{booking.user_phone || 'N/A'}</span>
+            {/* Status on mobile: badge only, stacked */}
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
+              {getStatusBadge(booking.status)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Booking #{booking.id.slice(0, 8)} • {format(new Date(booking.created_at), 'PPp')}
-            </p>
           </div>
-          <div className="flex items-center gap-2">
-            {getStatusBadge(booking.status)}
-            <Select
-              value={booking.status}
-              onValueChange={(value) => onStatusChange(booking.id, value)}
-              disabled={updatingId === booking.id}
-            >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Status selector - full width on mobile */}
+          <Select
+            value={booking.status}
+            onValueChange={(value) => onStatusChange(booking.id, value)}
+            disabled={updatingId === booking.id}
+          >
+            <SelectTrigger className="w-full md:w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
-      <CardContent>
-        {/* Highlighted Delivery Schedule */}
-        <div className="bg-secondary/50 rounded-lg p-3 mb-4 flex flex-wrap gap-4">
+      <CardContent className="px-3 md:px-6">
+        {/* Delivery Schedule - stacked on mobile */}
+        <div className="bg-secondary/50 rounded-lg p-2.5 md:p-3 mb-3 md:mb-4 grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-4">
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Delivery Date</p>
-              <p className="text-sm font-semibold">
+            <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] md:text-xs text-muted-foreground">Delivery Date</p>
+              <p className="text-xs md:text-sm font-semibold truncate">
                 {booking.delivery_date ? format(new Date(booking.delivery_date), 'PPP') : 'Not set'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" />
+            <Clock className="w-4 h-4 text-primary shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Time Slot</p>
-              <p className="text-sm font-semibold">{booking.time_slot || 'Not set'}</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Time Slot</p>
+              <p className="text-xs md:text-sm font-semibold">{booking.time_slot || 'Not set'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Address</p>
-              <p className="text-sm font-semibold">{booking.delivery_address}</p>
+            <MapPin className="w-4 h-4 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] md:text-xs text-muted-foreground">Address</p>
+              <p className="text-xs md:text-sm font-semibold break-words">{booking.delivery_address}</p>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <div>
-            <p className="text-sm font-medium mb-1">Phones</p>
-            <ul className="text-sm text-muted-foreground space-y-1">
+            <p className="text-xs md:text-sm font-medium mb-1">Phones</p>
+            <ul className="text-xs md:text-sm text-muted-foreground space-y-0.5">
               {booking.phone_names.map((name, i) => (
-                <li key={i}>
+                <li key={i} className="break-words">
                   • {name}
-                  {variants[i] && (
-                    <span className="ml-1 text-xs font-medium">({variants[i]})</span>
-                  )}
-                  {colors[i] && (
-                    <span className="ml-1 text-xs italic">— {colors[i]}</span>
-                  )}
+                  {variants[i] && <span className="ml-1 text-[10px] md:text-xs font-medium">({variants[i]})</span>}
+                  {colors[i] && <span className="ml-1 text-[10px] md:text-xs italic">— {colors[i]}</span>}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="flex gap-4 md:flex-col md:gap-3">
             <div>
-              <p className="text-sm font-medium mb-1">Payment</p>
-              <p className="text-sm text-muted-foreground capitalize">
-                {booking.payment_method || 'Not specified'}
-              </p>
+              <p className="text-xs md:text-sm font-medium mb-0.5">Payment</p>
+              <p className="text-xs md:text-sm text-muted-foreground capitalize">{booking.payment_method || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium mb-1">Amount</p>
-              <p className="text-sm font-bold text-primary">
-                {formatPrice(booking.total_amount)}
-              </p>
+              <p className="text-xs md:text-sm font-medium mb-0.5">Amount</p>
+              <p className="text-xs md:text-sm font-bold text-primary">{formatPrice(booking.total_amount)}</p>
             </div>
           </div>
         </div>
