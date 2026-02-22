@@ -160,7 +160,7 @@ const PhoneDetailPage = () => {
 
           {/* Image */}
           <div
-            className="relative w-full h-full flex items-center justify-center px-16"
+            className="relative w-full h-full flex items-center justify-center px-4 md:px-16"
             onTouchStart={handleTouchStart}
             onTouchEnd={(e) => handleTouchEnd(e, images, true)}
             onClick={(e) => e.stopPropagation()}
@@ -193,7 +193,7 @@ const PhoneDetailPage = () => {
         </div>
       )}
 
-      <div className="container py-8">
+      <div className="container py-8 overflow-x-hidden">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link to="/phones" className="hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />All Phones
@@ -276,13 +276,13 @@ const PhoneDetailPage = () => {
           <div className="space-y-6">
             <div>
               <Badge variant="secondary" className="mb-3">{phone.brand}</Badge>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">{phone.model}</h1>
+              <h1 className="text-2xl md:text-4xl font-bold mb-4">{phone.model}</h1>
               <div className="flex flex-wrap gap-2 mb-4">
                 {phone.highlights.map(highlight => (
                   <span key={highlight} className="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">{highlight}</span>
                 ))}
               </div>
-              <p className="text-3xl font-bold text-primary">{formatPrice(currentPrice)}</p>
+              <p className="text-2xl md:text-3xl font-bold text-primary">{formatPrice(currentPrice)}</p>
             </div>
 
             <Separator />
@@ -329,16 +329,16 @@ const PhoneDetailPage = () => {
             <Separator />
 
             <div>
-              <h2 className="font-semibold text-lg mb-2">About this phone</h2>
-              <p className="text-muted-foreground leading-relaxed">{phone.description}</p>
+              <h2 className="font-semibold text-base md:text-lg mb-2">About this phone</h2>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed break-words">{phone.description}</p>
             </div>
 
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
-              <p className="text-sm">
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 md:p-4 space-y-2">
+              <p className="text-xs md:text-sm">
                 <span className="font-semibold text-primary">Book a home experience</span>{' '}
                 for up to 5 phones. Our specialist demos them at your doorstep.
               </p>
-              <p className="text-sm text-muted-foreground">Love it? Buy it! Pay at delivery &amp; your deposit is refunded.</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Love it? Buy it! Pay at delivery &amp; your deposit is refunded.</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
