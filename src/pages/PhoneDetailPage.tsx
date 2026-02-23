@@ -326,6 +326,12 @@ const PhoneDetailPage = () => {
               </div>
             )}
 
+            <div className="flex flex-col gap-3">
+              <Button variant={inCart ? "outline" : "accent"} size="lg" onClick={handleCartAction} className="w-full text-sm md:text-base">
+                {inCart ? <><Check className="h-5 w-5 shrink-0" /><span>Added to Experience</span></> : <><Plus className="h-5 w-5 shrink-0" /><span>Add to Home Experience</span></>}
+              </Button>
+            </div>
+
             <Separator />
 
             <div>
@@ -339,12 +345,6 @@ const PhoneDetailPage = () => {
                 for up to 5 phones. Our specialist demos them at your doorstep.
               </p>
               <p className="text-xs md:text-sm text-muted-foreground">Love it? Buy it! Pay at delivery &amp; your deposit is refunded.</p>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Button variant={inCart ? "outline" : "accent"} size="lg" onClick={handleCartAction} className="w-full text-sm md:text-base">
-                {inCart ? <><Check className="h-5 w-5 shrink-0" /><span>Added to Experience</span></> : <><Plus className="h-5 w-5 shrink-0" /><span>Add to Home Experience</span></>}
-              </Button>
             </div>
 
             <Separator />
