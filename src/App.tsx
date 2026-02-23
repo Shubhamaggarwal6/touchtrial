@@ -8,6 +8,7 @@ import { CartProvider } from "@/context/CartContext";
 import { CompareProvider } from "@/context/CompareContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CompareBar } from "@/components/compare/CompareBar";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import PhonesPage from "./pages/PhonesPage";
 import PhoneDetailPage from "./pages/PhoneDetailPage";
@@ -34,6 +35,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/phones" element={<PhonesPage />} />
