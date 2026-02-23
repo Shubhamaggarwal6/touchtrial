@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { PhoneFormDialog } from './PhoneFormDialog';
+import { ExcelPhoneImport } from './ExcelPhoneImport';
 import { useAllPhonesAdmin } from '@/hooks/use-phones';
 import {
   AlertDialog,
@@ -84,14 +85,17 @@ export function PhonesManagement() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>
           <p className="text-muted-foreground">{phones.length} phones in catalogue</p>
         </div>
-        <Button onClick={handleAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Phone
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelPhoneImport />
+          <Button onClick={handleAdd}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Phone
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3">
