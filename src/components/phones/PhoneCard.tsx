@@ -117,9 +117,9 @@ export function PhoneCard({ phone }: PhoneCardProps) {
               </Button>
               <Button
                 variant={inCart ? "default" : "accent"}
-                size="sm"
+                size="icon"
                 onClick={handleCartAction}
-                className="shrink-0"
+                className="shrink-0 h-9 w-9"
               >
                 {inCart ? (
                   <Check className="h-4 w-4" />
