@@ -106,11 +106,11 @@ export function PhoneCard({ phone }: PhoneCardProps) {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-2 items-center">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex-1"
+                className="flex-1 min-w-0"
                 asChild
               >
                 <span>View Details</span>
@@ -119,7 +119,7 @@ export function PhoneCard({ phone }: PhoneCardProps) {
                 variant={inCart ? "default" : "accent"}
                 size="icon"
                 onClick={handleCartAction}
-                className="shrink-0 h-9 w-9"
+                className="shrink-0 min-h-[36px] min-w-[36px] h-9 w-9 rounded-full"
               >
                 {inCart ? (
                   <Check className="h-4 w-4" />
