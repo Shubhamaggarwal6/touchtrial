@@ -25,7 +25,7 @@ const AdminDashboardPage = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyUserId, setHistoryUserId] = useState<string | null>(null);
   const [historyUserName, setHistoryUserName] = useState('');
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'timeslot_asc' | 'timeslot_desc'>('newest');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -109,9 +109,18 @@ const AdminDashboardPage = () => {
     setHistoryOpen(true);
   };
 
+  const timeSlotOrder = (slot: string | null) => {
+    if (!slot) return 999;
+    const slots = ['9:00 AM - 11:00 AM', '11:00 AM - 1:00 PM', '1:00 PM - 3:00 PM', '3:00 PM - 5:00 PM', '5:00 PM - 7:00 PM', '7:00 PM - 9:00 PM'];
+    const idx = slots.indexOf(slot);
+    return idx === -1 ? 998 : idx;
+  };
+
   const filterBookings = (status: string) => {
     const filtered = status === 'all' ? bookings : bookings.filter(b => b.status === status);
     return filtered.sort((a, b) => {
+      if (sortOrder === 'timeslot_asc') return timeSlotOrder(a.time_slot) - timeSlotOrder(b.time_slot);
+      if (sortOrder === 'timeslot_desc') return timeSlotOrder(b.time_slot) - timeSlotOrder(a.time_slot);
       const dateA = new Date(a.created_at).getTime();
       const dateB = new Date(b.created_at).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
@@ -214,13 +223,15 @@ const AdminDashboardPage = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as 'newest' | 'oldest')}>
-                  <SelectTrigger className="w-[160px]">
+                <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as 'newest' | 'oldest' | 'timeslot_asc' | 'timeslot_desc')}>
+                  <SelectTrigger className="w-[200px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">Newest First</SelectItem>
                     <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="timeslot_asc">Time Slot (Early → Late)</SelectItem>
+                    <SelectItem value="timeslot_desc">Time Slot (Late → Early)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
