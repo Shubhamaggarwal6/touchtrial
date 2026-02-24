@@ -1,13 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Package, Home, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, Home, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const BookingSuccessPage = () => {
+  const navigate = useNavigate();
   return (
     <Layout>
       <div className="container py-16">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-1 -ml-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
         <div className="max-w-lg mx-auto text-center">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
             <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />

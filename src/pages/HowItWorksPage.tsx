@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
-import { Search, Package, CreditCard, CheckCircle2, ArrowRight, Truck } from 'lucide-react';
+import { Search, Package, CreditCard, CheckCircle2, ArrowRight, Truck, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -55,9 +56,14 @@ const steps = [
 ];
 
 const HowItWorksPage = () => {
+  const navigate = useNavigate();
   return (
     <Layout>
       <div className="container py-16">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-1 -ml-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">How It Works</h1>

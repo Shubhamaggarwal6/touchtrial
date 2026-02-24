@@ -16,7 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Loader2, CreditCard, Smartphone, Wallet, Clock, CalendarIcon } from 'lucide-react';
+import { Loader2, CreditCard, Smartphone, Wallet, Clock, CalendarIcon, ArrowLeft } from 'lucide-react';
 
 const TIME_SLOTS = [
   { value: '9am-12pm', label: '9:00 AM - 12:00 PM' },
@@ -200,6 +200,10 @@ const CheckoutPage = () => {
   return (
     <Layout>
       <div className="container py-8">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-1 -ml-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
         <h1 className="text-3xl md:text-4xl font-bold mb-8">Checkout</h1>
 
         <form onSubmit={handleSubmit}>

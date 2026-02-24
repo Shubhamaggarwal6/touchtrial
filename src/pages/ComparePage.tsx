@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { X, Plus, ArrowLeft } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { Phone } from '@/data/phones';
 
 export default function ComparePage() {
+  const navigate = useNavigate();
   const { compareList, removeFromCompare, clearCompare } = useCompare();
   const { addToCart, isInCart } = useCart();
 
@@ -54,6 +55,10 @@ export default function ComparePage() {
       <div className="container py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 gap-1 -ml-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-3xl font-bold">Compare Phones</h1>
             <p className="text-muted-foreground mt-1">
               Comparing {compareList.length} phone{compareList.length !== 1 ? 's' : ''}

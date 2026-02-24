@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Trash2, ArrowRight, ShoppingBag, Tag, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Trash2, ArrowRight, ShoppingBag, Tag, X, ArrowLeft } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { useCart } from '@/context/CartContext';
 import { toast } from '@/hooks/use-toast';
 
 const CartPage = () => {
+  const navigate = useNavigate();
   const { 
     items, 
     removeFromCart, 
@@ -89,6 +90,10 @@ const CartPage = () => {
       <div className="container py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 gap-1 -ml-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">Your Experience Cart</h1>
             <p className="text-muted-foreground">
               {items.length} phone{items.length > 1 ? 's' : ''} selected for home experience
