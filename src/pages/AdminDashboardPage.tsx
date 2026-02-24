@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw, Download, Smartphone, Tag, ArrowUpDown } from 'lucide-react';
+import { Loader2, RefreshCw, Download, Smartphone, Tag, ArrowUpDown, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BookingCard, type Booking } from '@/components/admin/BookingCard';
 import { UserHistoryDialog } from '@/components/admin/UserHistoryDialog';
@@ -174,6 +174,10 @@ const AdminDashboardPage = () => {
       <div className="container py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 gap-1 -ml-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-3xl md:text-4xl font-bold">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage bookings and phone catalogue</p>
           </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw, Mail, Phone, MapPin, Download, Shield } from 'lucide-react';
+import { User, Package, Clock, CheckCircle, XCircle, Smartphone, ArrowRight, RefreshCw, Mail, Phone, MapPin, Download, Shield, ArrowLeft } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,6 +177,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 gap-1 -ml-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">
               Welcome back, {profile?.full_name || user.email}

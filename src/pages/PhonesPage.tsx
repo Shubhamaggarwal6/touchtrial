@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { PhoneCard } from '@/components/phones/PhoneCard';
 import { PhoneFilters } from '@/components/phones/PhoneFilters';
@@ -26,6 +26,7 @@ const defaultFilters: FiltersState = {
 };
 
 const PhonesPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const [filters, setFilters] = useState<FiltersState>(defaultFilters);
@@ -59,6 +60,10 @@ const PhonesPage = () => {
     <Layout>
       <div className="container py-8">
         <div className="mb-8">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-1 -ml-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             {searchQuery ? `Search: "${searchQuery}"` : 'All Phones'}
           </h1>
