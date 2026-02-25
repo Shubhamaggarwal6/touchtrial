@@ -113,7 +113,7 @@ Guidelines:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.map((m: ChatMessage) => ({
@@ -154,6 +154,8 @@ Guidelines:
     });
 
     if (!response.ok) {
+      const text = await response.text();
+      console.error("AI gateway error:", response.status, text);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -164,10 +166,8 @@ Guidelines:
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
-      return new Response(JSON.stringify({ error: "Failed to get AI response" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "AI service is temporarily unavailable. Please try again in a few minutes." }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
