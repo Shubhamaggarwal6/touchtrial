@@ -13,11 +13,11 @@ import Index from "./pages/Index";
 import PhonesPage from "./pages/PhonesPage";
 import PhoneDetailPage from "./pages/PhoneDetailPage";
 import CartPage from "./pages/CartPage";
-
 import CheckoutPage from "./pages/CheckoutPage";
 import BookingSuccessPage from "./pages/BookingSuccessPage";
 import ComparePage from "./pages/ComparePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
+import TermsAndConditionsPage from "./pages/TermsAndConditionsPage";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
