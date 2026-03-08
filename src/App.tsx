@@ -46,7 +46,7 @@ const App = () => (
                   <Route path="/booking-success" element={<BookingSuccessPage />} />
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminDashboardPage />} />

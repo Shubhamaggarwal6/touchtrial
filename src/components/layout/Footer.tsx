@@ -42,9 +42,9 @@ export function Footer() {
               <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 FAQ
               </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Terms & Conditions
-              </a>
+              </Link>
               <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
               </a>
