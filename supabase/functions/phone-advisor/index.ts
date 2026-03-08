@@ -267,8 +267,11 @@ Guidelines:
 - Be conversational, friendly, and helpful
 - Ask clarifying questions to understand user needs (budget, use case, preferences)
 - Recommend 1-3 phones based on their requirements
-- When recommending phones, ALWAYS call the recommend_phones function with the phone IDs and a brief reason for each recommendation
-- Also include a text explanation in your message
+- When recommending phones, include a JSON block at the END of your message in this exact format:
+\`\`\`recommendations
+[{"phone_id":"exact-id-from-catalog","reason":"Brief reason"}]
+\`\`\`
+- Also include a text explanation before the JSON block
 - Mention key features and price in INR (use ₹ symbol)
 - If they mention a budget, respect it strictly
 - You can compare phones when asked
@@ -284,41 +287,13 @@ Guidelines:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5-mini",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.map((m: ChatMessage) => ({
             role: m.role,
             content: m.content,
           })),
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "recommend_phones",
-              description: "Recommend phones to the user. Call this whenever you suggest specific phones.",
-              parameters: {
-                type: "object",
-                properties: {
-                  recommendations: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        phone_id: { type: "string", description: "The phone ID from the catalog" },
-                        reason: { type: "string", description: "Brief reason for recommendation" },
-                      },
-                      required: ["phone_id", "reason"],
-                      additionalProperties: false,
-                    },
-                  },
-                },
-                required: ["recommendations"],
-                additionalProperties: false,
-              },
-            },
-          },
         ],
         stream: true,
       }),
