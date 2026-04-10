@@ -1,6 +1,6 @@
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { PhoneAdvisorChat } from '@/components/chat/PhoneAdvisorChat';
+
 
 interface LayoutProps {
   children: React.ReactNode;
