@@ -90,10 +90,6 @@ export function PhoneCard({ phone }: PhoneCardProps) {
               <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                 {phone.model}
               </h3>
-              <p className="text-lg font-bold text-primary mt-1">
-                ₹100
-              </p>
-              <p className="text-xs text-muted-foreground">Experience fee</p>
             </div>
 
             {/* Highlights */}
