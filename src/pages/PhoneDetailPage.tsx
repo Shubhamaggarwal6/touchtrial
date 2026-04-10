@@ -171,9 +171,9 @@ const PhoneDetailPage = () => {
             {/* Price Block */}
             <div className="bg-secondary/50 rounded-xl p-4 space-y-1">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-2xl md:text-3xl font-bold text-foreground">₹100</span>
+                <span className="text-2xl md:text-3xl font-bold text-foreground">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(phone.price)}</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">Home Experience fee · Pay at delivery</p>
+              <p className="text-[11px] text-muted-foreground">MRP · Inclusive of all taxes</p>
             </div>
 
             {/* EMI Info - Hidden since we only show experience fee */}
@@ -250,8 +250,8 @@ const PhoneDetailPage = () => {
             <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border pt-3 pb-4 -mx-4 px-4 md:static md:border-0 md:pt-0 md:pb-0 md:mx-0 md:px-0 md:bg-transparent md:backdrop-blur-none z-10">
               <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold">₹100</p>
-                  <p className="text-[11px] text-muted-foreground truncate">Experience fee · {currentVariant.ram} / {currentVariant.storage} · {phone.colors[selectedColor]?.name}</p>
+                  <p className="text-lg font-bold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(phone.price)}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{currentVariant.ram} / {currentVariant.storage} · {phone.colors[selectedColor]?.name}</p>
                 </div>
                 <Button variant={inCart ? "outline" : "accent"} size="lg" onClick={handleCartAction} className="shrink-0">
                   {inCart ? <><Check className="h-5 w-5" />Added</> : <><Plus className="h-5 w-5" />Add to Experience</>}
