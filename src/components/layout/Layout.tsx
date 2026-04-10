@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
       <Header />
       <main className="flex-1 overflow-x-hidden">{children}</main>
       <Footer />
-      <PhoneAdvisorChat />
+      
     </div>
   );
 }
