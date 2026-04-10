@@ -91,8 +91,9 @@ export function PhoneCard({ phone }: PhoneCardProps) {
                 {phone.model}
               </h3>
               <p className="text-lg font-bold text-primary mt-1">
-                {formatPrice(phone.price)}
+                ₹100
               </p>
+              <p className="text-xs text-muted-foreground">Experience fee</p>
             </div>
 
             {/* Highlights */}

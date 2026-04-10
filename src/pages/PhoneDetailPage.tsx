@@ -171,20 +171,20 @@ const PhoneDetailPage = () => {
             {/* Price Block */}
             <div className="bg-secondary/50 rounded-xl p-4 space-y-1">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-2xl md:text-3xl font-bold text-foreground">{formatPrice(currentPrice)}</span>
-                <span className="text-sm text-muted-foreground line-through">{formatPrice(mrp)}</span>
-                <span className="text-sm font-semibold text-accent-foreground bg-accent/20 px-1.5 py-0.5 rounded">↓{discountPercent}% off</span>
+                <span className="text-2xl md:text-3xl font-bold text-foreground">₹100</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">Inclusive of all taxes</p>
+              <p className="text-[11px] text-muted-foreground">Home Experience fee · Pay at delivery</p>
             </div>
 
-            {/* EMI Info */}
+            {/* EMI Info - Hidden since we only show experience fee */}
+            {/* 
             <div className="flex items-center gap-2 p-3 rounded-lg border border-border/50 bg-background">
               <div className="shrink-0 text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">EMI</div>
               <p className="text-xs text-muted-foreground">
                 Starting from <span className="font-semibold text-foreground">{formatPrice(Math.round(currentPrice / 12))}/month</span> · No cost EMI available
               </p>
             </div>
+            */}
 
             <Separator />
 
@@ -250,8 +250,8 @@ const PhoneDetailPage = () => {
             <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border pt-3 pb-4 -mx-4 px-4 md:static md:border-0 md:pt-0 md:pb-0 md:mx-0 md:px-0 md:bg-transparent md:backdrop-blur-none z-10">
               <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold">{formatPrice(currentPrice)}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{currentVariant.ram} / {currentVariant.storage} · {phone.colors[selectedColor]?.name}</p>
+                  <p className="text-lg font-bold">₹100</p>
+                  <p className="text-[11px] text-muted-foreground truncate">Experience fee · {currentVariant.ram} / {currentVariant.storage} · {phone.colors[selectedColor]?.name}</p>
                 </div>
                 <Button variant={inCart ? "outline" : "accent"} size="lg" onClick={handleCartAction} className="shrink-0">
                   {inCart ? <><Check className="h-5 w-5" />Added</> : <><Plus className="h-5 w-5" />Add to Experience</>}
