@@ -1,6 +1,6 @@
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { PhoneAdvisorChat } from '@/components/chat/PhoneAdvisorChat';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
       <Header />
       <main className="flex-1 overflow-x-hidden">{children}</main>
       <Footer />
-      <PhoneAdvisorChat />
+      
     </div>
   );
 }
