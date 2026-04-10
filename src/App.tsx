@@ -47,6 +47,7 @@ const App = () => (
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/how-it-works" element={<HowItWorksPage />} />
                   <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminDashboardPage />} />
